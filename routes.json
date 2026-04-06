@@ -1,0 +1,82 @@
+[
+  {
+    "id": "unitree-us",
+    "from": "Hangzhou, China",
+    "to": "Los Angeles, CA",
+    "fromLat": 30.2741, "fromLng": 120.1551,
+    "toLat": 33.9425, "toLng": -118.4081,
+    "type": "shipping",
+    "label": "Unitree → US market",
+    "color": "#bf3318"
+  },
+  {
+    "id": "nvidia-tsmc",
+    "from": "Santa Clara, CA",
+    "to": "Hsinchu, Taiwan",
+    "fromLat": 37.3688, "fromLng": -121.9641,
+    "toLat": 24.8138, "toLng": 120.9675,
+    "type": "manufacturing",
+    "label": "Nvidia → TSMC fabrication",
+    "color": "#1D9E75"
+  },
+  {
+    "id": "figure-bmw",
+    "from": "San Jose, CA",
+    "to": "Spartanburg, SC",
+    "fromLat": 37.3382, "fromLng": -121.8863,
+    "toLat": 34.9496, "toLng": -81.9321,
+    "type": "deployment",
+    "label": "Figure AI → BMW plant",
+    "color": "#378ADD"
+  },
+  {
+    "id": "symbotic-walmart",
+    "from": "Wilmington, MA",
+    "to": "Bentonville, AR",
+    "fromLat": 42.5584, "fromLng": -71.1648,
+    "toLat": 36.3729, "toLng": -94.2088,
+    "type": "deployment",
+    "label": "Symbotic → Walmart HQ",
+    "color": "#378ADD"
+  },
+  {
+    "id": "symbotic-awg",
+    "from": "Wilmington, MA",
+    "to": "Pearl River, LA",
+    "fromLat": 42.5584, "fromLng": -71.1648,
+    "toLat": 30.3685, "toLng": -89.7595,
+    "type": "deployment",
+    "label": "Symbotic → AWG Gulf Coast",
+    "color": "#378ADD"
+  },
+  {
+    "id": "kuka-china",
+    "from": "Augsburg, Germany",
+    "to": "Foshan, China",
+    "fromLat": 48.3705, "fromLng": 10.8978,
+    "toLat": 23.0219, "toLng": 113.1215,
+    "type": "manufacturing",
+    "label": "KUKA → China manufacturing",
+    "color": "#1D9E75"
+  },
+  {
+    "id": "abb-global",
+    "from": "Zurich, Switzerland",
+    "to": "Auburn Hills, MI",
+    "fromLat": 47.3769, "fromLng": 8.5417,
+    "toLat": 42.6872, "toLng": -83.2344,
+    "type": "deployment",
+    "label": "ABB → US automotive",
+    "color": "#378ADD"
+  },
+  {
+    "id": "deepmind-agile",
+    "from": "London, UK",
+    "to": "Munich, Germany",
+    "fromLat": 51.5074, "fromLng": -0.1278,
+    "toLat": 48.1351, "toLng": 11.5820,
+    "type": "partnership",
+    "label": "DeepMind → Agile Robots",
+    "color": "#BA7517"
+  }
+]
