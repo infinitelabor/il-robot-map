@@ -5,95 +5,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IL Robot Map — Infinite Labor</title>
 <meta name="description" content="The global map of the robotics economy. Every major player, every supply chain, live news feed. By Infinite Labor.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --red:#bf3318;--dark:#0e0d0b;--paper:#f5f2ea;
-  --mono:'IBM Plex Mono',monospace;--display:'Bebas Neue',sans-serif;
-  --green:#1D9E75;--blue:#378ADD;--amber:#BA7517;--purple:#7F77DD;
-}
+:root{--red:#bf3318;--dark:#0e0d0b;--mono:'IBM Plex Mono',monospace;--display:'Bebas Neue',sans-serif;}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f0ece2;font-family:var(--mono)}
-
-/* HEADER */
-.header{position:fixed;top:0;left:0;right:0;height:52px;background:rgba(14,13,11,0.95);border-bottom:1px solid #2a2620;z-index:100;display:flex;align-items:center;gap:0;padding:0}
-.header-brand{display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid #2a2620;height:100%}
+.header{position:fixed;top:0;left:0;right:0;height:52px;background:rgba(14,13,11,0.97);border-bottom:1px solid #2a2620;z-index:100;display:flex;align-items:center;padding:0}
+.header-brand{display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid #2a2620;height:100%;flex-shrink:0}
 .brand-name{font-family:var(--display);font-size:22px;letter-spacing:2px;color:#f0ece2}
 .brand-name span{color:var(--red)}
 .brand-tag{font-size:9px;letter-spacing:2px;color:#4a4640;text-transform:uppercase}
-.header-search{flex:1;display:flex;align-items:center;padding:0 16px;gap:10px;border-right:1px solid #2a2620}
-.search-icon{font-size:12px;color:#4a4640}
+.header-search{flex:1;display:flex;align-items:center;padding:0 16px;gap:10px;border-right:1px solid #2a2620;min-width:0}
+.search-icon{font-size:12px;color:#4a4640;flex-shrink:0}
 .search-input{background:transparent;border:none;outline:none;color:#f0ece2;font-family:var(--mono);font-size:11px;width:100%;letter-spacing:0.5px}
-.search-input::placeholder{color:#3a3630}
-.header-filters{display:flex;align-items:center;gap:2px;padding:0 12px;border-right:1px solid #2a2620}
-.filter-btn{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:5px 10px;border:0.5px solid transparent;cursor:pointer;background:transparent;color:#5a5448;transition:all 0.15s}
+.search-input::placeholder{color:#252220}
+.header-filters{display:flex;align-items:center;gap:2px;padding:0 10px;border-right:1px solid #2a2620;flex-shrink:0}
+.filter-btn{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:5px 9px;border:0.5px solid transparent;cursor:pointer;background:transparent;color:#3a3630;transition:all 0.15s}
 .filter-btn:hover{color:#9a9080;border-color:#3a3630}
-.filter-btn.on{color:#f0ece2;border-color:#4a4440;background:rgba(255,255,255,0.05)}
-.filter-btn.on[data-type="Humanoid"]{color:#E24B4A;border-color:#E24B4A}
-.filter-btn.on[data-type="Industrial Robot"]{color:#1D9E75;border-color:#1D9E75}
-.filter-btn.on[data-type="AI / Agents"]{color:#7F77DD;border-color:#7F77DD}
-.filter-btn.on[data-type="Picks & Shovels"]{color:#EF9F27;border-color:#EF9F27}
-.filter-btn.on[data-type="Software Automation"]{color:#378ADD;border-color:#378ADD}
-.header-sub{padding:0 16px;font-size:9px;color:#3a3630;letter-spacing:1px;white-space:nowrap}
+.filter-btn.active{color:#f0ece2;border-color:#4a4440;background:rgba(255,255,255,0.04)}
+.filter-btn.active[data-type="Humanoid"]{color:#E24B4A;border-color:rgba(226,75,74,0.4)}
+.filter-btn.active[data-type="Industrial Robot"]{color:#1D9E75;border-color:rgba(29,158,117,0.4)}
+.filter-btn.active[data-type="AI / Agents"]{color:#7F77DD;border-color:rgba(127,119,221,0.4)}
+.filter-btn.active[data-type="Picks & Shovels"]{color:#EF9F27;border-color:rgba(239,159,39,0.4)}
+.filter-btn.active[data-type="Software Automation"]{color:#378ADD;border-color:rgba(55,138,221,0.4)}
+.header-sub{padding:0 16px;font-size:9px;color:#3a3630;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
 .header-sub a{color:var(--red);text-decoration:none}
 .header-sub a:hover{text-decoration:underline}
-
-/* LAYOUT */
 .layout{position:fixed;top:52px;left:0;right:0;bottom:0;display:flex}
 .globe-container{flex:1;position:relative;overflow:hidden}
 #globe-canvas{width:100%;height:100%}
-
-/* SIDEBAR */
-.sidebar{width:320px;flex-shrink:0;border-left:1px solid #1a1814;display:flex;flex-direction:column;background:rgba(14,13,11,0.98)}
-.sidebar-header{padding:14px 16px;border-bottom:1px solid #1a1814;display:flex;justify-content:space-between;align-items:center}
-.sidebar-title{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--red)}
-.sidebar-count{font-size:9px;color:#3a3630;letter-spacing:1px}
-.news-feed{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a2620 transparent}
-.news-feed::-webkit-scrollbar{width:3px}
-.news-feed::-webkit-scrollbar-track{background:transparent}
-.news-feed::-webkit-scrollbar-thumb{background:#2a2620}
-.news-item{padding:12px 16px;border-bottom:1px solid #111009;cursor:pointer;transition:background 0.1s;display:block;text-decoration:none;color:inherit}
+.sidebar{width:300px;flex-shrink:0;border-left:1px solid #1a1814;display:flex;flex-direction:column;background:#09080700}
+.sidebar-header{padding:12px 16px;border-bottom:1px solid #1a1814;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:#0a0908}
+.sidebar-title{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--red)}
+.sidebar-count{font-size:8px;color:#2a2620;letter-spacing:1px}
+.news-feed{flex:1;overflow-y:auto;background:#0a0908;scrollbar-width:thin;scrollbar-color:#1a1814 transparent}
+.news-feed::-webkit-scrollbar{width:2px}
+.news-feed::-webkit-scrollbar-thumb{background:#1a1814}
+.news-item{padding:11px 16px;border-bottom:1px solid #0e0c0a;cursor:pointer;transition:background 0.1s;display:block;text-decoration:none;color:inherit}
 .news-item:hover{background:rgba(191,51,24,0.05)}
-.news-source{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:4px}
-.news-hed{font-size:11px;line-height:1.5;color:#d4cfc3}
-.news-time{font-size:8px;color:#3a3630;margin-top:5px;letter-spacing:1px}
-.news-loading{padding:20px 16px;font-size:10px;color:#3a3630;text-align:center;letter-spacing:1px}
-
-/* SLIDE PANEL */
-.panel{position:absolute;top:0;right:0;bottom:0;width:340px;background:#111009;border-left:1px solid #2a2620;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);z-index:50;overflow-y:auto}
+.news-source{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:3px}
+.news-hed{font-size:10px;line-height:1.55;color:#a4a09a}
+.news-time{font-size:7px;color:#2a2620;margin-top:4px;letter-spacing:1px}
+.news-loading{padding:20px 16px;font-size:9px;color:#2a2620;text-align:center;letter-spacing:1px}
+.panel{position:absolute;top:0;right:0;bottom:0;width:320px;background:#0d0c0a;border-left:1px solid #2a2620;transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.16,1,0.3,1);z-index:50;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1a1814 transparent}
 .panel.open{transform:translateX(0)}
-.panel-close{position:absolute;top:14px;right:14px;background:none;border:none;color:#4a4640;cursor:pointer;font-size:16px;line-height:1;font-family:var(--mono)}
+.panel-close{position:absolute;top:14px;right:14px;background:none;border:none;color:#3a3630;cursor:pointer;font-size:14px;font-family:var(--mono);z-index:1}
 .panel-close:hover{color:#f0ece2}
-.panel-type{font-size:9px;letter-spacing:3px;text-transform:uppercase;padding:20px 20px 8px;margin-top:0}
-.panel-name{font-family:var(--display);font-size:36px;letter-spacing:1px;padding:0 20px 4px;line-height:1}
-.panel-sub{font-size:10px;color:#5a5448;padding:0 20px 16px;letter-spacing:1px}
-.panel-divider{border:none;border-top:1px solid #1a1814;margin:0 20px 16px}
-.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#1a1814;margin:0 20px 16px}
-.panel-stat{background:#0e0d0b;padding:10px 12px}
-.panel-stat-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#3a3630;margin-bottom:4px}
-.panel-stat-val{font-size:12px;font-weight:500;color:#d4cfc3}
-.panel-thesis{font-size:11px;line-height:1.75;color:#7a7265;padding:0 20px 16px}
-.panel-thesis strong{color:#d4cfc3;font-weight:500}
-.panel-link{display:block;margin:0 20px 20px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);text-decoration:none;padding:8px 12px;border:1px solid rgba(191,51,24,0.3)}
-.panel-link:hover{background:rgba(191,51,24,0.1)}
-.il-badge{display:inline-block;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;background:rgba(191,51,24,0.15);color:var(--red);border:0.5px solid rgba(191,51,24,0.3);margin:0 20px 16px}
-
-/* LEGEND */
-.legend{position:absolute;bottom:16px;left:16px;background:rgba(14,13,11,0.9);border:1px solid #1a1814;padding:10px 14px}
-.legend-title{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#3a3630;margin-bottom:8px}
-.legend-item{display:flex;align-items:center;gap:8px;font-size:9px;color:#5a5448;letter-spacing:1px;padding:2px 0}
-.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.legend-line{width:16px;height:2px;flex-shrink:0}
-
-/* STATS BAR */
-.stats-bar{position:absolute;bottom:16px;right:16px;display:flex;gap:1px}
-.stat-pill{background:rgba(14,13,11,0.9);border:1px solid #1a1814;padding:8px 12px;text-align:center}
-.stat-pill-num{font-family:var(--display);font-size:18px;color:#f0ece2;letter-spacing:1px;display:block}
-.stat-pill-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#3a3630;display:block;margin-top:1px}
-
-/* ROUTE LEGEND */
-.route-legend{display:flex;flex-direction:column;gap:3px;margin-top:10px;padding-top:10px;border-top:1px solid #1a1814}
+.panel-type{font-size:8px;letter-spacing:3px;text-transform:uppercase;padding:22px 20px 6px}
+.panel-name{font-family:var(--display);font-size:32px;letter-spacing:1px;padding:0 20px 3px;line-height:1}
+.panel-sub{font-size:9px;color:#4a4440;padding:0 20px 14px;letter-spacing:1px}
+.panel-divider{border:none;border-top:1px solid #1a1814;margin:0 20px 14px}
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#111009;margin:0 20px 14px}
+.panel-stat{background:#0d0c0a;padding:9px 11px}
+.panel-stat-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#2a2620;margin-bottom:3px}
+.panel-stat-val{font-size:11px;color:#c4bfb3}
+.panel-thesis{font-size:10px;line-height:1.8;color:#6a6458;padding:0 20px 14px}
+.panel-thesis strong{color:#c4bfb3;font-weight:500}
+.panel-link{display:block;margin:0 20px 10px;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--red);text-decoration:none;padding:8px 12px;border:0.5px solid rgba(191,51,24,0.25);transition:background 0.15s}
+.panel-link:hover{background:rgba(191,51,24,0.08)}
+.il-badge{font-size:7px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;background:rgba(191,51,24,0.1);color:var(--red);border:0.5px solid rgba(191,51,24,0.25);display:inline-block;margin:0 20px 14px}
+.legend{position:absolute;bottom:16px;left:16px;background:rgba(10,9,8,0.93);border:0.5px solid #1a1814;padding:10px 13px}
+.legend-title{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#2a2620;margin-bottom:7px}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:8px;color:#4a4440;letter-spacing:0.5px;padding:2px 0}
+.legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.legend-line{width:14px;height:1.5px;flex-shrink:0}
+.route-legend{margin-top:8px;padding-top:8px;border-top:0.5px solid #1a1814}
+.stats-bar{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:1px;white-space:nowrap}
+.stat-pill{background:rgba(10,9,8,0.93);border:0.5px solid #1a1814;padding:7px 14px;text-align:center}
+.stat-pill-num{font-family:var(--display);font-size:20px;color:#f0ece2;letter-spacing:1px;display:block;line-height:1}
+.stat-pill-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#2a2620;display:block;margin-top:2px}
 </style>
 </head>
 <body>
@@ -102,15 +82,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
   <div class="header-brand">
     <div>
       <div class="brand-name">INFINITE LA<span>B</span>OR</div>
-      <div class="brand-tag">Robot Map — Q1 2026</div>
+      <div class="brand-tag">Robot Map · Q1 2026</div>
     </div>
   </div>
   <div class="header-search">
     <span class="search-icon">⌕</span>
-    <input class="search-input" id="search" placeholder="Search companies — Figure AI, Nvidia, Symbotic..." autocomplete="off">
+    <input class="search-input" id="search" placeholder="Search — Figure AI, Nvidia, Symbotic, Japan..." autocomplete="off">
   </div>
   <div class="header-filters">
-    <button class="filter-btn on" data-type="all" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn active" data-type="all" onclick="setFilter('all',this)">All</button>
     <button class="filter-btn" data-type="Humanoid" onclick="setFilter('Humanoid',this)">Humanoid</button>
     <button class="filter-btn" data-type="Industrial Robot" onclick="setFilter('Industrial Robot',this)">Industrial</button>
     <button class="filter-btn" data-type="AI / Agents" onclick="setFilter('AI / Agents',this)">AI</button>
@@ -123,7 +103,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 </div>
 
 <div class="layout">
-  <div class="globe-container">
+  <div class="globe-container" id="globe-wrap">
     <div id="globe-canvas"></div>
 
     <div class="legend">
@@ -131,7 +111,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
       <div class="legend-item"><div class="legend-dot" style="background:#E24B4A"></div>Humanoid</div>
       <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Industrial Robot</div>
       <div class="legend-item"><div class="legend-dot" style="background:#7F77DD"></div>AI / Agents</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#EF9F27"></div>Picks & Shovels</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#EF9F27"></div>Picks &amp; Shovels</div>
       <div class="legend-item"><div class="legend-dot" style="background:#378ADD"></div>Software</div>
       <div class="route-legend">
         <div class="legend-title">Routes</div>
@@ -144,8 +124,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 
     <div class="stats-bar">
       <div class="stat-pill"><span class="stat-pill-num" id="stat-companies">20</span><span class="stat-pill-label">Companies</span></div>
-      <div class="stat-pill"><span class="stat-pill-num" id="stat-routes">8</span><span class="stat-pill-label">Routes</span></div>
-      <div class="stat-pill"><span class="stat-pill-num" id="stat-news">—</span><span class="stat-pill-label">News today</span></div>
+      <div class="stat-pill"><span class="stat-pill-num">8</span><span class="stat-pill-label">Routes</span></div>
+      <div class="stat-pill"><span class="stat-pill-num" id="stat-news">—</span><span class="stat-pill-label">Today</span></div>
     </div>
 
     <div class="panel" id="panel">
@@ -167,202 +147,177 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 
 <script src="https://unpkg.com/globe.gl@2.27.2/dist/globe.gl.min.js"></script>
 <script>
-const TYPE_COLORS = {
-  'Humanoid': '#E24B4A',
-  'Industrial Robot': '#1D9E75',
-  'AI / Agents': '#7F77DD',
-  'Picks & Shovels': '#EF9F27',
-  'Software Automation': '#378ADD'
-};
+const TYPE_COLORS={'Humanoid':'#E24B4A','Industrial Robot':'#1D9E75','AI / Agents':'#7F77DD','Picks & Shovels':'#EF9F27','Software Automation':'#378ADD'};
 
-let allCompanies = [];
-let allRoutes = [];
-let activeFilter = 'all';
+const COMPANIES=[
+  {id:"figure-ai",name:"Figure AI",type:"Humanoid",hq:"San Jose, CA",lat:37.3382,lng:-121.8863,status:"Private",funding:"$1.9B",valuation:"$39B",thesis:"Best-capitalized US pure-play humanoid. Helix AI model is the real product.",url:"https://figure.ai",il_covered:true},
+  {id:"tesla-optimus",name:"Tesla / Optimus",type:"Humanoid",hq:"Austin, TX",lat:30.2672,lng:-97.7431,status:"Public",ticker:"TSLA",funding:"Public",valuation:"~$750B",thesis:"Most vertically integrated player. If Optimus works at scale it becomes the largest robotics company by far.",url:"https://tesla.com",il_covered:true},
+  {id:"apptronik",name:"Apptronik",type:"Humanoid",hq:"Austin, TX",lat:30.3075,lng:-97.8934,status:"Private",funding:"$520M",valuation:"Undisclosed",thesis:"NASA heritage reliability. Modular design. $520M raise validates the thesis.",url:"https://apptronik.com",il_covered:true},
+  {id:"boston-dynamics",name:"Boston Dynamics",type:"Humanoid",hq:"Waltham, MA",lat:42.3765,lng:-71.2356,status:"Private",funding:"Hyundai-owned",valuation:"Undisclosed",thesis:"Atlas entering production. 30,000 units targeted by 2028 for Hyundai factories.",url:"https://bostondynamics.com",il_covered:false},
+  {id:"unitree",name:"Unitree Robotics",type:"Humanoid",hq:"Hangzhou, China",lat:30.2741,lng:120.1551,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"The price floor setter. G1 at $13,500 changes market dynamics for everyone.",url:"https://unitree.com",il_covered:true},
+  {id:"physical-intelligence",name:"Physical Intelligence",type:"AI / Agents",hq:"San Francisco, CA",lat:37.7749,lng:-122.4194,status:"Private",funding:"$400M",valuation:"Undisclosed",thesis:"Building the foundation model for physical AI. The GPT moment for robot brains.",url:"https://physicalintelligence.company",il_covered:true},
+  {id:"nvidia",name:"Nvidia",type:"Picks & Shovels",hq:"Santa Clara, CA",lat:37.3688,lng:-121.9641,status:"Public",ticker:"NVDA",funding:"Public",valuation:"~$2.9T",thesis:"The compute substrate for all physical AI. Wins regardless of who wins the hardware war.",url:"https://nvidia.com",il_covered:true},
+  {id:"intuitive-surgical",name:"Intuitive Surgical",type:"Industrial Robot",hq:"Sunnyvale, CA",lat:37.3688,lng:-122.0363,status:"Public",ticker:"ISRG",funding:"Public",valuation:"~$190B",thesis:"The template for robotics monetization at scale. 10,763 systems globally.",url:"https://intuitivesurgical.com",il_covered:true},
+  {id:"symbotic",name:"Symbotic",type:"Industrial Robot",hq:"Wilmington, MA",lat:42.5584,lng:-71.1648,status:"Public",ticker:"SYM",funding:"Public",valuation:"~$8B",thesis:"Warehouse-as-a-Service pioneer. $22.5B backlog. The AWS model for logistics.",url:"https://symbotic.com",il_covered:true},
+  {id:"abb-robotics",name:"ABB Robotics",type:"Industrial Robot",hq:"Zurich, Switzerland",lat:47.3769,lng:8.5417,status:"Public",ticker:"ABB",funding:"Public",valuation:"~$90B",thesis:"Industrial robotics incumbent. NVIDIA partnership signals the software era is coming.",url:"https://abb.com",il_covered:true},
+  {id:"fanuc",name:"FANUC",type:"Industrial Robot",hq:"Oshino, Japan",lat:35.4781,lng:138.7650,status:"Public",ticker:"6954.T",funding:"Public",valuation:"~$25B",thesis:"2M+ robots installed globally. Integrating Nvidia Isaac for AI-driven factory automation.",url:"https://fanuc.com",il_covered:false},
+  {id:"yaskawa",name:"Yaskawa Electric",type:"Industrial Robot",hq:"Kitakyushu, Japan",lat:33.8834,lng:130.8751,status:"Public",ticker:"6506.T",funding:"Public",valuation:"~$8B",thesis:"Industrial robot incumbent. Part of Nvidia's global physical AI ecosystem.",url:"https://yaskawa.co.jp",il_covered:false},
+  {id:"kuka",name:"KUKA",type:"Industrial Robot",hq:"Augsburg, Germany",lat:48.3705,lng:10.8978,status:"Public",ticker:"KU2.DE",funding:"Midea-owned",valuation:"~$3B",thesis:"European industrial robot giant. Chinese-owned. Integrating Nvidia Omniverse.",url:"https://kuka.com",il_covered:false},
+  {id:"agility-robotics",name:"Agility Robotics",type:"Humanoid",hq:"Salem, OR",lat:44.9429,lng:-123.0351,status:"Private",funding:"$150M+",valuation:"Undisclosed",thesis:"Digit deployed in Amazon warehouses. First humanoid in production logistics.",url:"https://agilityrobotics.com",il_covered:false},
+  {id:"uipath",name:"UiPath",type:"Software Automation",hq:"New York, NY",lat:40.7128,lng:-74.0060,status:"Public",ticker:"PATH",funding:"Public",valuation:"~$7B",thesis:"RPA incumbent being commoditized by AI agents. Existential threat from LLMs.",url:"https://uipath.com",il_covered:true},
+  {id:"deepmind-robotics",name:"Google DeepMind Robotics",type:"AI / Agents",hq:"London, UK",lat:51.5074,lng:-0.1278,status:"Public",funding:"Alphabet-owned",valuation:"Alphabet",thesis:"Gemini Robotics now deployed in Agile Robots' 20,000 global systems. Platform play.",url:"https://deepmind.google",il_covered:false},
+  {id:"mind-robotics",name:"Mind Robotics",type:"Industrial Robot",hq:"Normal, IL",lat:40.5142,lng:-88.9906,status:"Private",funding:"$615M",valuation:"~$2B",thesis:"Rivian spinout. Industrial robots trained on EV factory data. $500M Series A.",url:"https://mindrobotics.com",il_covered:true},
+  {id:"softbank-robotics",name:"SoftBank / Exol",type:"Industrial Robot",hq:"Tokyo, Japan",lat:35.6762,lng:139.6503,status:"Private",funding:"SoftBank-owned",valuation:"Undisclosed",thesis:"65% owner of Exol (GreenBox) WaaS JV with Symbotic. $7.5B system contract.",url:"https://softbankrobotics.com",il_covered:true},
+  {id:"agibot",name:"AgiBot",type:"Humanoid",hq:"Shanghai, China",lat:31.2304,lng:121.4737,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"Chinese humanoid manufacturer scaling rapidly. Part of Nvidia's physical AI ecosystem.",url:"https://agibot.com",il_covered:false},
+  {id:"skild-ai",name:"Skild AI",type:"AI / Agents",hq:"Pittsburgh, PA",lat:40.4406,lng:-79.9959,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"Generalized robot intelligence platform. Partnered with ABB, Universal Robots, Foxconn.",url:"https://skild.ai",il_covered:false}
+];
+
+const ROUTES=[
+  {fromLat:30.2741,fromLng:120.1551,toLat:33.9425,toLng:-118.4081,color:"#bf3318",label:"Unitree → US market"},
+  {fromLat:37.3688,fromLng:-121.9641,toLat:24.8138,toLng:120.9675,color:"#1D9E75",label:"Nvidia → TSMC fabrication"},
+  {fromLat:37.3382,fromLng:-121.8863,toLat:34.9496,toLng:-81.9321,color:"#378ADD",label:"Figure AI → BMW plant"},
+  {fromLat:42.5584,fromLng:-71.1648,toLat:36.3729,toLng:-94.2088,color:"#378ADD",label:"Symbotic → Walmart"},
+  {fromLat:42.5584,fromLng:-71.1648,toLat:30.3685,toLng:-89.7595,color:"#378ADD",label:"Symbotic → AWG Gulf Coast"},
+  {fromLat:48.3705,fromLng:10.8978,toLat:23.0219,toLng:113.1215,color:"#1D9E75",label:"KUKA → China manufacturing"},
+  {fromLat:47.3769,fromLng:8.5417,toLat:42.6872,toLng:-83.2344,color:"#378ADD",label:"ABB → US automotive"},
+  {fromLat:51.5074,fromLng:-0.1278,toLat:48.1351,toLng:11.5820,color:"#BA7517",label:"DeepMind → Agile Robots"}
+];
+
+const HUBS=[
+  {lat:31.2,lng:121.4,color:"#bf3318",label:"Shanghai robotics hub"},
+  {lat:37.4,lng:-122.0,color:"#7F77DD",label:"Silicon Valley AI hub"},
+  {lat:35.6,lng:139.7,color:"#1D9E75",label:"Tokyo industrial hub"},
+  {lat:48.5,lng:10.9,color:"#1D9E75",label:"Bavaria industrial hub"}
+];
+
+let activeFilter='all';
+let isHovered=false;
 let globe;
 
-// ── GLOBE SETUP ──────────────────────────────────────────────────────────────
-function initGlobe(companies, routes) {
-  const el = document.getElementById('globe-canvas');
+function buildGlobe(){
+  const el=document.getElementById('globe-canvas');
+  const wrap=document.getElementById('globe-wrap');
 
-  globe = Globe()(el)
+  globe=Globe()(el)
     .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
     .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
     .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
     .showAtmosphere(true)
     .atmosphereColor('#bf3318')
-    .atmosphereAltitude(0.12)
-    .pointsData(companies)
-    .pointLat('lat')
-    .pointLng('lng')
-    .pointColor(d => TYPE_COLORS[d.type] || '#888')
-    .pointAltitude(0.018)
-    .pointRadius(d => d.il_covered ? 0.45 : 0.3)
-    .pointLabel(d => `<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:rgba(14,13,11,0.95);color:#f0ece2;padding:6px 10px;border:0.5px solid #2a2620;border-left:2px solid ${TYPE_COLORS[d.type]}">${d.name}<br><span style="color:#5a5448;font-size:9px">${d.type} · ${d.hq}</span></div>`)
-    .onPointClick(d => openPanel(d))
-    .arcsData(routes)
-    .arcStartLat('fromLat')
-    .arcStartLng('fromLng')
-    .arcEndLat('toLat')
-    .arcEndLng('toLng')
+    .atmosphereAltitude(0.1)
+    .pointsData(COMPANIES)
+    .pointLat('lat').pointLng('lng')
+    .pointColor(d=>TYPE_COLORS[d.type]||'#888')
+    .pointAltitude(0.02)
+    .pointRadius(d=>d.il_covered?0.5:0.32)
+    .pointLabel(d=>`<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:rgba(10,9,8,0.96);color:#f0ece2;padding:6px 10px;border:0.5px solid #2a2620;border-left:2px solid ${TYPE_COLORS[d.type]};pointer-events:none">${d.name}<br><span style="color:#5a5448;font-size:9px">${d.type} · ${d.hq}</span></div>`)
+    .onPointClick(d=>openPanel(d))
+    .arcsData(ROUTES)
+    .arcStartLat('fromLat').arcStartLng('fromLng')
+    .arcEndLat('toLat').arcEndLng('toLng')
     .arcColor('color')
-    .arcAltitudeAutoScale(0.3)
-    .arcStroke(0.5)
-    .arcDashLength(0.4)
-    .arcDashGap(0.2)
-    .arcDashAnimateTime(3000)
-    .arcLabel(d => `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(14,13,11,0.95);color:#d4cfc3;padding:5px 10px;border:0.5px solid #2a2620">${d.label}</div>`)
+    .arcAltitudeAutoScale(0.35)
+    .arcStroke(0.6)
+    .arcDashLength(0.35)
+    .arcDashGap(0.15)
+    .arcDashAnimateTime(4000)
+    .arcLabel(d=>`<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(10,9,8,0.96);color:#d4cfc3;padding:5px 9px;border:0.5px solid #2a2620;pointer-events:none">${d.label}</div>`)
+    .ringsData(HUBS)
+    .ringLat('lat').ringLng('lng')
+    .ringColor(d=>d.color)
+    .ringMaxRadius(4)
+    .ringPropagationSpeed(1.2)
+    .ringRepeatPeriod(1800)
     .width(el.offsetWidth)
     .height(el.offsetHeight);
 
-  // Auto-rotate
-  globe.controls().autoRotate = true;
-  globe.controls().autoRotateSpeed = 0.4;
-  globe.controls().enableZoom = true;
+  globe.controls().autoRotate=true;
+  globe.controls().autoRotateSpeed=0.25;
+  globe.controls().enableZoom=true;
 
-  // Resize handler
-  window.addEventListener('resize', () => {
-    globe.width(el.offsetWidth).height(el.offsetHeight);
-  });
+  wrap.addEventListener('mouseenter',()=>{isHovered=true;globe.controls().autoRotateSpeed=0.08;});
+  wrap.addEventListener('mouseleave',()=>{isHovered=false;globe.controls().autoRotateSpeed=0.25;});
+  window.addEventListener('resize',()=>{globe.width(el.offsetWidth).height(el.offsetHeight);});
 }
 
-// ── PANEL ────────────────────────────────────────────────────────────────────
-function openPanel(company) {
-  const color = TYPE_COLORS[company.type] || '#888';
-  const ilBadge = company.il_covered
-    ? `<div class="il-badge">⚙ Covered in Infinite Labor</div>`
-    : '';
-
-  document.getElementById('panel-content').innerHTML = `
-    <div class="panel-type" style="color:${color}">${company.type}</div>
-    <div class="panel-name">${company.name}</div>
-    <div class="panel-sub">${company.hq} · ${company.status}${company.ticker ? ' · $'+company.ticker : ''}</div>
-    ${ilBadge}
+function openPanel(c){
+  const color=TYPE_COLORS[c.type]||'#888';
+  document.getElementById('panel-content').innerHTML=`
+    <div class="panel-type" style="color:${color}">${c.type}</div>
+    <div class="panel-name">${c.name}</div>
+    <div class="panel-sub">${c.hq} · ${c.status}${c.ticker?' · $'+c.ticker:''}</div>
+    ${c.il_covered?'<div class="il-badge">⚙ Covered in Infinite Labor</div>':''}
     <hr class="panel-divider">
     <div class="panel-grid">
-      <div class="panel-stat"><div class="panel-stat-label">Funding</div><div class="panel-stat-val">${company.funding}</div></div>
-      <div class="panel-stat"><div class="panel-stat-label">Valuation</div><div class="panel-stat-val">${company.valuation || '—'}</div></div>
-      <div class="panel-stat"><div class="panel-stat-label">Status</div><div class="panel-stat-val">${company.status}</div></div>
-      <div class="panel-stat"><div class="panel-stat-label">Category</div><div class="panel-stat-val">${company.type}</div></div>
+      <div class="panel-stat"><div class="panel-stat-label">Funding</div><div class="panel-stat-val">${c.funding}</div></div>
+      <div class="panel-stat"><div class="panel-stat-label">Valuation</div><div class="panel-stat-val">${c.valuation||'—'}</div></div>
+      <div class="panel-stat"><div class="panel-stat-label">Status</div><div class="panel-stat-val">${c.status}</div></div>
+      <div class="panel-stat"><div class="panel-stat-label">Category</div><div class="panel-stat-val">${c.type}</div></div>
     </div>
-    <div class="panel-thesis"><strong>IL Thesis:</strong> ${company.thesis}</div>
-    <a class="panel-link" href="${company.url}" target="_blank">Visit ${company.name} →</a>
-    <a class="panel-link" href="https://infinitelabor.substack.com" target="_blank" style="margin-top:0">Read Infinite Labor for coverage →</a>
+    <div class="panel-thesis"><strong>IL Thesis:</strong> ${c.thesis}</div>
+    <a class="panel-link" href="${c.url}" target="_blank" rel="noopener">Visit ${c.name} →</a>
+    <a class="panel-link" href="https://infinitelabor.substack.com" target="_blank" rel="noopener">Read Infinite Labor →</a>
   `;
   document.getElementById('panel').classList.add('open');
-  globe.controls().autoRotate = false;
+  globe.pointOfView({lat:c.lat,lng:c.lng,altitude:1.6},800);
+  globe.controls().autoRotate=false;
 }
 
-function closePanel() {
+function closePanel(){
   document.getElementById('panel').classList.remove('open');
-  globe.controls().autoRotate = true;
+  globe.controls().autoRotate=true;
+  globe.controls().autoRotateSpeed=isHovered?0.08:0.25;
 }
 
-// ── FILTERS ──────────────────────────────────────────────────────────────────
-function setFilter(type, btn) {
-  activeFilter = type;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-
-  const filtered = type === 'all'
-    ? allCompanies
-    : allCompanies.filter(c => c.type === type);
-
-  globe.pointsData(filtered);
-  document.getElementById('stat-companies').textContent = filtered.length;
+function setFilter(type,btn){
+  activeFilter=type;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const f=type==='all'?COMPANIES:COMPANIES.filter(c=>c.type===type);
+  globe.pointsData(f)
+    .pointLat('lat').pointLng('lng')
+    .pointColor(d=>TYPE_COLORS[d.type]||'#888')
+    .pointAltitude(0.02)
+    .pointRadius(d=>d.il_covered?0.5:0.32);
+  document.getElementById('stat-companies').textContent=f.length;
 }
 
-// ── SEARCH ───────────────────────────────────────────────────────────────────
-document.getElementById('search').addEventListener('input', function() {
-  const q = this.value.toLowerCase().trim();
-  if (!q) {
-    globe.pointsData(activeFilter === 'all' ? allCompanies : allCompanies.filter(c => c.type === activeFilter));
-    return;
-  }
-  const match = allCompanies.find(c =>
-    c.name.toLowerCase().includes(q) ||
-    c.hq.toLowerCase().includes(q) ||
-    c.type.toLowerCase().includes(q)
-  );
-  if (match) {
-    globe.pointsData([match]);
-    globe.pointOfView({ lat: match.lat, lng: match.lng, altitude: 1.8 }, 1200);
-    globe.controls().autoRotate = false;
-    setTimeout(() => openPanel(match), 1300);
+document.getElementById('search').addEventListener('input',function(){
+  const q=this.value.toLowerCase().trim();
+  if(!q){setFilter(activeFilter,document.querySelector('.filter-btn.active'));return;}
+  const m=COMPANIES.find(c=>c.name.toLowerCase().includes(q)||c.hq.toLowerCase().includes(q)||c.type.toLowerCase().includes(q));
+  if(m){
+    globe.pointsData([m]).pointLat('lat').pointLng('lng').pointColor(d=>TYPE_COLORS[d.type]||'#888').pointAltitude(0.02).pointRadius(0.65);
+    globe.pointOfView({lat:m.lat,lng:m.lng,altitude:1.5},1000);
+    globe.controls().autoRotate=false;
+    setTimeout(()=>openPanel(m),1100);
   }
 });
 
-// ── NEWS FEED ────────────────────────────────────────────────────────────────
-const RSS_FEEDS = [
-  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https://www.therobotreport.com/feed/', source: 'Robot Report' },
-  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https://techcrunch.com/tag/robotics/feed/', source: 'TechCrunch' },
-  { url: 'https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/search?q=humanoid+robots&hl=en-US&gl=US&ceid=US:en', source: 'Google News' },
-];
+function timeAgo(d){const s=(Date.now()-new Date(d))/1000;if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
 
-function timeAgo(dateStr) {
-  const diff = (Date.now() - new Date(dateStr)) / 1000;
-  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
-  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
-  return Math.floor(diff/86400) + 'd ago';
-}
-
-async function loadFeed() {
-  const feed = document.getElementById('news-feed');
-  const allItems = [];
-
-  await Promise.all(RSS_FEEDS.map(async ({url, source}) => {
-    try {
-      const r = await fetch(url);
-      const data = await r.json();
-      if (data.items) {
-        data.items.slice(0, 8).forEach(item => {
-          allItems.push({ title: item.title, link: item.link, date: item.pubDate, source });
-        });
-      }
-    } catch(e) {}
+async function loadFeed(){
+  const feeds=[
+    {url:'https://api.rss2json.com/v1/api.json?rss_url=https://www.therobotreport.com/feed/',source:'Robot Report'},
+    {url:'https://api.rss2json.com/v1/api.json?rss_url=https://techcrunch.com/tag/robotics/feed/',source:'TechCrunch'},
+    {url:'https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/search?q=humanoid+robots&hl=en-US&gl=US&ceid=US:en',source:'Google News'},
+  ];
+  const items=[];
+  await Promise.all(feeds.map(async({url,source})=>{
+    try{const r=await fetch(url);const d=await r.json();if(d.items)d.items.slice(0,8).forEach(i=>items.push({title:i.title,link:i.link,date:i.pubDate,source}));}catch(e){}
   }));
-
-  if (allItems.length === 0) {
-    feed.innerHTML = `<div class="news-loading">Unable to load feed.<br>Check back shortly.</div>`;
-    return;
-  }
-
-  allItems.sort((a,b) => new Date(b.date) - new Date(a.date));
-  const today = allItems.filter(i => (Date.now() - new Date(i.date)) < 86400000).length;
-  document.getElementById('stat-news').textContent = today;
-  document.getElementById('feed-count').textContent = allItems.length + ' stories';
-
-  feed.innerHTML = allItems.map(item => `
-    <a class="news-item" href="${item.link}" target="_blank" rel="noopener">
-      <div class="news-source">${item.source}</div>
-      <div class="news-hed">${item.title}</div>
-      <div class="news-time">${timeAgo(item.date)}</div>
-    </a>
-  `).join('');
+  items.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const today=items.filter(i=>(Date.now()-new Date(i.date))<86400000).length;
+  document.getElementById('stat-news').textContent=today||'—';
+  document.getElementById('feed-count').textContent=items.length+' stories';
+  const feed=document.getElementById('news-feed');
+  if(!items.length){feed.innerHTML='<div class="news-loading">Feed unavailable — try again shortly.</div>';return;}
+  feed.innerHTML=items.map(i=>`<a class="news-item" href="${i.link}" target="_blank" rel="noopener"><div class="news-source">${i.source}</div><div class="news-hed">${i.title}</div><div class="news-time">${timeAgo(i.date)}</div></a>`).join('');
 }
 
-// ── INIT ─────────────────────────────────────────────────────────────────────
-async function init() {
-  try {
-    const [companiesRes, routesRes] = await Promise.all([
-      fetch('companies.json'),
-      fetch('routes.json')
-    ]);
-    allCompanies = await companiesRes.json();
-    allRoutes = await routesRes.json();
-  } catch(e) {
-    // Fallback: inline data if fetch fails (e.g. local file://)
-    allCompanies = [];
-    allRoutes = [];
-  }
-
-  initGlobe(allCompanies, allRoutes);
-  loadFeed();
-
-  // Reload feed every 15 minutes
-  setInterval(loadFeed, 15 * 60 * 1000);
-}
-
-init();
+buildGlobe();
+loadFeed();
+setInterval(loadFeed,15*60*1000);
 </script>
 </body>
 </html>
