@@ -10,17 +10,17 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--red:#bf3318;--dark:#0e0d0b;--mono:'IBM Plex Mono',monospace;--display:'Bebas Neue',sans-serif;}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f0ece2;font-family:var(--mono)}
-.header{position:fixed;top:0;left:0;right:0;height:52px;background:rgba(14,13,11,0.97);border-bottom:1px solid #2a2620;z-index:100;display:flex;align-items:center;padding:0}
-.header-brand{display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid #2a2620;height:100%;flex-shrink:0}
-.brand-name{font-family:var(--display);font-size:22px;letter-spacing:2px;color:#f0ece2}
+.header{position:fixed;top:0;left:0;right:0;height:52px;background:rgba(14,13,11,0.97);border-bottom:1px solid #2a2620;z-index:100;display:flex;align-items:center;padding:0;gap:0}
+.header-brand{display:flex;align-items:center;gap:10px;padding:0 16px;border-right:1px solid #2a2620;height:100%;flex-shrink:0}
+.brand-name{font-family:var(--display);font-size:20px;letter-spacing:2px;color:#f0ece2}
 .brand-name span{color:var(--red)}
-.brand-tag{font-size:9px;letter-spacing:2px;color:#4a4640;text-transform:uppercase}
-.header-search{flex:1;display:flex;align-items:center;padding:0 16px;gap:10px;border-right:1px solid #2a2620;min-width:0}
-.search-icon{font-size:12px;color:#4a4640;flex-shrink:0}
-.search-input{background:transparent;border:none;outline:none;color:#f0ece2;font-family:var(--mono);font-size:11px;width:100%;letter-spacing:0.5px}
+.brand-tag{font-size:8px;letter-spacing:2px;color:#4a4640;text-transform:uppercase}
+.header-search{flex:1;display:flex;align-items:center;padding:0 14px;gap:8px;border-right:1px solid #2a2620;min-width:0}
+.search-icon{font-size:11px;color:#4a4640;flex-shrink:0}
+.search-input{background:transparent;border:none;outline:none;color:#f0ece2;font-family:var(--mono);font-size:10px;width:100%;letter-spacing:0.5px}
 .search-input::placeholder{color:#252220}
-.header-filters{display:flex;align-items:center;gap:2px;padding:0 10px;border-right:1px solid #2a2620;flex-shrink:0}
-.filter-btn{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:5px 9px;border:0.5px solid transparent;cursor:pointer;background:transparent;color:#3a3630;transition:all 0.15s}
+.header-filters{display:flex;align-items:center;gap:1px;padding:0 8px;border-right:1px solid #2a2620;flex-shrink:0;flex-wrap:wrap}
+.filter-btn{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:5px 8px;border:0.5px solid transparent;cursor:pointer;background:transparent;color:#3a3630;transition:all 0.15s}
 .filter-btn:hover{color:#9a9080;border-color:#3a3630}
 .filter-btn.active{color:#f0ece2;border-color:#4a4440;background:rgba(255,255,255,0.04)}
 .filter-btn.active[data-type="Humanoid"]{color:#E24B4A;border-color:rgba(226,75,74,0.4)}
@@ -28,52 +28,75 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 .filter-btn.active[data-type="AI / Agents"]{color:#7F77DD;border-color:rgba(127,119,221,0.4)}
 .filter-btn.active[data-type="Picks & Shovels"]{color:#EF9F27;border-color:rgba(239,159,39,0.4)}
 .filter-btn.active[data-type="Software Automation"]{color:#378ADD;border-color:rgba(55,138,221,0.4)}
-.header-sub{padding:0 16px;font-size:9px;color:#3a3630;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
+.density-btn{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:5px 8px;border:0.5px solid rgba(191,51,24,0.3);cursor:pointer;background:transparent;color:#bf3318;transition:all 0.15s;margin-left:3px;flex-shrink:0}
+.density-btn:hover{background:rgba(191,51,24,0.1)}
+.density-btn.on{background:rgba(191,51,24,0.18);border-color:var(--red);color:#f06040}
+.header-sub{padding:0 14px;font-size:8px;color:#3a3630;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
 .header-sub a{color:var(--red);text-decoration:none}
 .header-sub a:hover{text-decoration:underline}
+
 .layout{position:fixed;top:52px;left:0;right:0;bottom:0;display:flex}
 .globe-container{flex:1;position:relative;overflow:hidden}
 #globe-canvas{width:100%;height:100%}
-.sidebar{width:300px;flex-shrink:0;border-left:1px solid #1a1814;display:flex;flex-direction:column;background:#09080700}
-.sidebar-header{padding:12px 16px;border-bottom:1px solid #1a1814;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:#0a0908}
+
+/* SIDEBAR */
+.sidebar{width:290px;flex-shrink:0;border-left:1px solid #1a1814;display:flex;flex-direction:column;background:#0a0908;transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);position:relative;z-index:10}
+.sidebar.hidden{transform:translateX(100%);position:absolute;right:0;top:0;bottom:0}
+.sidebar-toggle{position:absolute;left:-32px;top:50%;transform:translateY(-50%);width:32px;height:56px;background:#0a0908;border:0.5px solid #1a1814;border-right:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:#4a4440;z-index:11;transition:color 0.15s}
+.sidebar-toggle:hover{color:#f0ece2}
+.sidebar-header{padding:12px 16px;border-bottom:1px solid #1a1814;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 .sidebar-title{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--red)}
 .sidebar-count{font-size:8px;color:#2a2620;letter-spacing:1px}
-.news-feed{flex:1;overflow-y:auto;background:#0a0908;scrollbar-width:thin;scrollbar-color:#1a1814 transparent}
+.news-feed{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1a1814 transparent}
 .news-feed::-webkit-scrollbar{width:2px}
 .news-feed::-webkit-scrollbar-thumb{background:#1a1814}
-.news-item{padding:11px 16px;border-bottom:1px solid #0e0c0a;cursor:pointer;transition:background 0.1s;display:block;text-decoration:none;color:inherit}
+.news-item{padding:10px 16px;border-bottom:1px solid #0e0c0a;cursor:pointer;transition:background 0.1s;display:block;text-decoration:none;color:inherit}
 .news-item:hover{background:rgba(191,51,24,0.05)}
 .news-source{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:3px}
-.news-hed{font-size:10px;line-height:1.55;color:#a4a09a}
+.news-hed{font-size:10px;line-height:1.5;color:#a4a09a}
 .news-time{font-size:7px;color:#2a2620;margin-top:4px;letter-spacing:1px}
 .news-loading{padding:20px 16px;font-size:9px;color:#2a2620;text-align:center;letter-spacing:1px}
-.panel{position:absolute;top:0;right:0;bottom:0;width:320px;background:#0d0c0a;border-left:1px solid #2a2620;transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.16,1,0.3,1);z-index:50;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1a1814 transparent}
+
+/* PANEL */
+.panel{position:absolute;top:0;right:0;bottom:0;width:310px;background:#0d0c0a;border-left:1px solid #2a2620;transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.16,1,0.3,1);z-index:50;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1a1814 transparent}
 .panel.open{transform:translateX(0)}
 .panel-close{position:absolute;top:14px;right:14px;background:none;border:none;color:#3a3630;cursor:pointer;font-size:14px;font-family:var(--mono);z-index:1}
 .panel-close:hover{color:#f0ece2}
-.panel-type{font-size:8px;letter-spacing:3px;text-transform:uppercase;padding:22px 20px 6px}
-.panel-name{font-family:var(--display);font-size:32px;letter-spacing:1px;padding:0 20px 3px;line-height:1}
-.panel-sub{font-size:9px;color:#4a4440;padding:0 20px 14px;letter-spacing:1px}
-.panel-divider{border:none;border-top:1px solid #1a1814;margin:0 20px 14px}
-.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#111009;margin:0 20px 14px}
-.panel-stat{background:#0d0c0a;padding:9px 11px}
+.panel-type{font-size:8px;letter-spacing:3px;text-transform:uppercase;padding:20px 18px 5px}
+.panel-name{font-family:var(--display);font-size:30px;letter-spacing:1px;padding:0 18px 3px;line-height:1}
+.panel-sub{font-size:9px;color:#4a4440;padding:0 18px 12px;letter-spacing:1px}
+.panel-divider{border:none;border-top:1px solid #1a1814;margin:0 18px 12px}
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#111009;margin:0 18px 12px}
+.panel-stat{background:#0d0c0a;padding:8px 10px}
 .panel-stat-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#2a2620;margin-bottom:3px}
-.panel-stat-val{font-size:11px;color:#c4bfb3}
-.panel-thesis{font-size:10px;line-height:1.8;color:#6a6458;padding:0 20px 14px}
+.panel-stat-val{font-size:10px;color:#c4bfb3}
+.panel-thesis{font-size:10px;line-height:1.75;color:#6a6458;padding:0 18px 12px}
 .panel-thesis strong{color:#c4bfb3;font-weight:500}
-.panel-link{display:block;margin:0 20px 10px;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--red);text-decoration:none;padding:8px 12px;border:0.5px solid rgba(191,51,24,0.25);transition:background 0.15s}
+.panel-link{display:block;margin:0 18px 8px;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--red);text-decoration:none;padding:7px 10px;border:0.5px solid rgba(191,51,24,0.25);transition:background 0.15s}
 .panel-link:hover{background:rgba(191,51,24,0.08)}
-.il-badge{font-size:7px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;background:rgba(191,51,24,0.1);color:var(--red);border:0.5px solid rgba(191,51,24,0.25);display:inline-block;margin:0 20px 14px}
-.legend{position:absolute;bottom:16px;left:16px;background:rgba(10,9,8,0.93);border:0.5px solid #1a1814;padding:10px 13px}
-.legend-title{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#2a2620;margin-bottom:7px}
-.legend-item{display:flex;align-items:center;gap:7px;font-size:8px;color:#4a4440;letter-spacing:0.5px;padding:2px 0}
-.legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.legend-line{width:14px;height:1.5px;flex-shrink:0}
-.route-legend{margin-top:8px;padding-top:8px;border-top:0.5px solid #1a1814}
+.il-badge{font-size:7px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;background:rgba(191,51,24,0.1);color:var(--red);border:0.5px solid rgba(191,51,24,0.25);display:inline-block;margin:0 18px 12px}
+
+/* LEGEND */
+.legend{position:absolute;bottom:16px;left:16px;background:rgba(10,9,8,0.93);border:0.5px solid #1a1814;padding:9px 12px;max-width:155px}
+.legend-title{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#2a2620;margin-bottom:6px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:8px;color:#4a4440;letter-spacing:0.5px;padding:2px 0}
+.legend-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.legend-line{width:12px;height:1px;flex-shrink:0}
+.route-legend{margin-top:7px;padding-top:7px;border-top:0.5px solid #1a1814}
+.density-legend{margin-top:7px;padding-top:7px;border-top:0.5px solid #1a1814;display:none}
+.density-legend.on{display:block}
+.density-grad{height:5px;background:linear-gradient(to right,rgba(191,51,24,0.1),rgba(191,51,24,1));border-radius:1px;margin:5px 0 3px}
+.density-labels{display:flex;justify-content:space-between;font-size:7px;color:#3a3630;letter-spacing:0.5px}
+
+/* STATS */
 .stats-bar{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:1px;white-space:nowrap}
-.stat-pill{background:rgba(10,9,8,0.93);border:0.5px solid #1a1814;padding:7px 14px;text-align:center}
-.stat-pill-num{font-family:var(--display);font-size:20px;color:#f0ece2;letter-spacing:1px;display:block;line-height:1}
-.stat-pill-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#2a2620;display:block;margin-top:2px}
+.stat-pill{background:rgba(10,9,8,0.93);border:0.5px solid #1a1814;padding:6px 12px;text-align:center}
+.stat-pill-num{font-family:var(--display);font-size:18px;color:#f0ece2;letter-spacing:1px;display:block;line-height:1}
+.stat-pill-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#2a2620;display:block;margin-top:1px}
+
+/* DENSITY STATUS */
+.density-status{position:absolute;top:62px;left:50%;transform:translateX(-50%);background:rgba(191,51,24,0.15);border:0.5px solid rgba(191,51,24,0.4);padding:5px 14px;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#bf3318;display:none;z-index:80}
+.density-status.on{display:block}
 </style>
 </head>
 <body>
@@ -87,7 +110,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
   </div>
   <div class="header-search">
     <span class="search-icon">⌕</span>
-    <input class="search-input" id="search" placeholder="Search — Figure AI, Nvidia, Symbotic, Japan..." autocomplete="off">
+    <input class="search-input" id="search" placeholder="Search companies, cities, types..." autocomplete="off">
   </div>
   <div class="header-filters">
     <button class="filter-btn active" data-type="all" onclick="setFilter('all',this)">All</button>
@@ -96,11 +119,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
     <button class="filter-btn" data-type="AI / Agents" onclick="setFilter('AI / Agents',this)">AI</button>
     <button class="filter-btn" data-type="Picks & Shovels" onclick="setFilter('Picks & Shovels',this)">Infra</button>
     <button class="filter-btn" data-type="Software Automation" onclick="setFilter('Software Automation',this)">Software</button>
+    <button class="density-btn" id="density-btn" onclick="toggleDensity()">⬡ Density</button>
   </div>
   <div class="header-sub">
-    <a href="https://infinitelabor.substack.com" target="_blank">Subscribe to Infinite Labor →</a>
+    <a href="https://infinitelabor.substack.com" target="_blank">Subscribe →</a>
   </div>
 </div>
+
+<div class="density-status" id="density-status">⬡ Robot density active — darker red = more robots per worker. Hover any country for the number.</div>
 
 <div class="layout">
   <div class="globe-container" id="globe-wrap">
@@ -111,20 +137,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
       <div class="legend-item"><div class="legend-dot" style="background:#E24B4A"></div>Humanoid</div>
       <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Industrial Robot</div>
       <div class="legend-item"><div class="legend-dot" style="background:#7F77DD"></div>AI / Agents</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#EF9F27"></div>Picks &amp; Shovels</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#EF9F27"></div>Infra</div>
       <div class="legend-item"><div class="legend-dot" style="background:#378ADD"></div>Software</div>
       <div class="route-legend">
-        <div class="legend-title">Routes</div>
+        <div class="legend-title">Supply chain</div>
         <div class="legend-item"><div class="legend-line" style="background:#bf3318"></div>Shipping</div>
-        <div class="legend-item"><div class="legend-line" style="background:#1D9E75"></div>Manufacturing</div>
+        <div class="legend-item"><div class="legend-line" style="background:#1D9E75"></div>Mfg</div>
         <div class="legend-item"><div class="legend-line" style="background:#378ADD"></div>Deployment</div>
         <div class="legend-item"><div class="legend-line" style="background:#BA7517"></div>Partnership</div>
+      </div>
+      <div class="density-legend" id="density-legend">
+        <div class="legend-title">Robots / 10k workers</div>
+        <div class="density-grad"></div>
+        <div class="density-labels"><span>Low</span><span>1,012 (KOR)</span></div>
       </div>
     </div>
 
     <div class="stats-bar">
-      <div class="stat-pill"><span class="stat-pill-num" id="stat-companies">20</span><span class="stat-pill-label">Companies</span></div>
-      <div class="stat-pill"><span class="stat-pill-num">8</span><span class="stat-pill-label">Routes</span></div>
+      <div class="stat-pill"><span class="stat-pill-num" id="stat-companies">42</span><span class="stat-pill-label">Companies</span></div>
+      <div class="stat-pill"><span class="stat-pill-num">20</span><span class="stat-pill-label">Routes</span></div>
       <div class="stat-pill"><span class="stat-pill-num" id="stat-news">—</span><span class="stat-pill-label">Today</span></div>
     </div>
 
@@ -134,7 +165,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
     </div>
   </div>
 
-  <div class="sidebar">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle feed">▶</div>
     <div class="sidebar-header">
       <span class="sidebar-title">Live Feed</span>
       <span class="sidebar-count" id="feed-count">Loading...</span>
@@ -149,50 +181,158 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 <script>
 const TYPE_COLORS={'Humanoid':'#E24B4A','Industrial Robot':'#1D9E75','AI / Agents':'#7F77DD','Picks & Shovels':'#EF9F27','Software Automation':'#378ADD'};
 
+// IFR 2024 robot density data (robots per 10,000 workers)
+const DENSITY={
+  'KOR':1012,'SGP':730,'DEU':429,'CHN':470,'JPN':419,'SWE':309,
+  'TWN':292,'USA':285,'DNK':246,'ITA':219,'BEL':218,'NLD':209,
+  'FIN':197,'AUT':193,'SVN':185,'CZE':171,'ESP':163,'SVK':155,
+  'FRA':154,'GBR':126,'HUN':125,'CAN':118,'AUS':96,'IND':55,'MEX':51,'BRA':23
+};
+
 const COMPANIES=[
-  {id:"figure-ai",name:"Figure AI",type:"Humanoid",hq:"San Jose, CA",lat:37.3382,lng:-121.8863,status:"Private",funding:"$1.9B",valuation:"$39B",thesis:"Best-capitalized US pure-play humanoid. Helix AI model is the real product.",url:"https://figure.ai",il_covered:true},
-  {id:"tesla-optimus",name:"Tesla / Optimus",type:"Humanoid",hq:"Austin, TX",lat:30.2672,lng:-97.7431,status:"Public",ticker:"TSLA",funding:"Public",valuation:"~$750B",thesis:"Most vertically integrated player. If Optimus works at scale it becomes the largest robotics company by far.",url:"https://tesla.com",il_covered:true},
-  {id:"apptronik",name:"Apptronik",type:"Humanoid",hq:"Austin, TX",lat:30.3075,lng:-97.8934,status:"Private",funding:"$520M",valuation:"Undisclosed",thesis:"NASA heritage reliability. Modular design. $520M raise validates the thesis.",url:"https://apptronik.com",il_covered:true},
-  {id:"boston-dynamics",name:"Boston Dynamics",type:"Humanoid",hq:"Waltham, MA",lat:42.3765,lng:-71.2356,status:"Private",funding:"Hyundai-owned",valuation:"Undisclosed",thesis:"Atlas entering production. 30,000 units targeted by 2028 for Hyundai factories.",url:"https://bostondynamics.com",il_covered:false},
-  {id:"unitree",name:"Unitree Robotics",type:"Humanoid",hq:"Hangzhou, China",lat:30.2741,lng:120.1551,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"The price floor setter. G1 at $13,500 changes market dynamics for everyone.",url:"https://unitree.com",il_covered:true},
-  {id:"physical-intelligence",name:"Physical Intelligence",type:"AI / Agents",hq:"San Francisco, CA",lat:37.7749,lng:-122.4194,status:"Private",funding:"$400M",valuation:"Undisclosed",thesis:"Building the foundation model for physical AI. The GPT moment for robot brains.",url:"https://physicalintelligence.company",il_covered:true},
-  {id:"nvidia",name:"Nvidia",type:"Picks & Shovels",hq:"Santa Clara, CA",lat:37.3688,lng:-121.9641,status:"Public",ticker:"NVDA",funding:"Public",valuation:"~$2.9T",thesis:"The compute substrate for all physical AI. Wins regardless of who wins the hardware war.",url:"https://nvidia.com",il_covered:true},
-  {id:"intuitive-surgical",name:"Intuitive Surgical",type:"Industrial Robot",hq:"Sunnyvale, CA",lat:37.3688,lng:-122.0363,status:"Public",ticker:"ISRG",funding:"Public",valuation:"~$190B",thesis:"The template for robotics monetization at scale. 10,763 systems globally.",url:"https://intuitivesurgical.com",il_covered:true},
-  {id:"symbotic",name:"Symbotic",type:"Industrial Robot",hq:"Wilmington, MA",lat:42.5584,lng:-71.1648,status:"Public",ticker:"SYM",funding:"Public",valuation:"~$8B",thesis:"Warehouse-as-a-Service pioneer. $22.5B backlog. The AWS model for logistics.",url:"https://symbotic.com",il_covered:true},
-  {id:"abb-robotics",name:"ABB Robotics",type:"Industrial Robot",hq:"Zurich, Switzerland",lat:47.3769,lng:8.5417,status:"Public",ticker:"ABB",funding:"Public",valuation:"~$90B",thesis:"Industrial robotics incumbent. NVIDIA partnership signals the software era is coming.",url:"https://abb.com",il_covered:true},
-  {id:"fanuc",name:"FANUC",type:"Industrial Robot",hq:"Oshino, Japan",lat:35.4781,lng:138.7650,status:"Public",ticker:"6954.T",funding:"Public",valuation:"~$25B",thesis:"2M+ robots installed globally. Integrating Nvidia Isaac for AI-driven factory automation.",url:"https://fanuc.com",il_covered:false},
-  {id:"yaskawa",name:"Yaskawa Electric",type:"Industrial Robot",hq:"Kitakyushu, Japan",lat:33.8834,lng:130.8751,status:"Public",ticker:"6506.T",funding:"Public",valuation:"~$8B",thesis:"Industrial robot incumbent. Part of Nvidia's global physical AI ecosystem.",url:"https://yaskawa.co.jp",il_covered:false},
-  {id:"kuka",name:"KUKA",type:"Industrial Robot",hq:"Augsburg, Germany",lat:48.3705,lng:10.8978,status:"Public",ticker:"KU2.DE",funding:"Midea-owned",valuation:"~$3B",thesis:"European industrial robot giant. Chinese-owned. Integrating Nvidia Omniverse.",url:"https://kuka.com",il_covered:false},
-  {id:"agility-robotics",name:"Agility Robotics",type:"Humanoid",hq:"Salem, OR",lat:44.9429,lng:-123.0351,status:"Private",funding:"$150M+",valuation:"Undisclosed",thesis:"Digit deployed in Amazon warehouses. First humanoid in production logistics.",url:"https://agilityrobotics.com",il_covered:false},
-  {id:"uipath",name:"UiPath",type:"Software Automation",hq:"New York, NY",lat:40.7128,lng:-74.0060,status:"Public",ticker:"PATH",funding:"Public",valuation:"~$7B",thesis:"RPA incumbent being commoditized by AI agents. Existential threat from LLMs.",url:"https://uipath.com",il_covered:true},
-  {id:"deepmind-robotics",name:"Google DeepMind Robotics",type:"AI / Agents",hq:"London, UK",lat:51.5074,lng:-0.1278,status:"Public",funding:"Alphabet-owned",valuation:"Alphabet",thesis:"Gemini Robotics now deployed in Agile Robots' 20,000 global systems. Platform play.",url:"https://deepmind.google",il_covered:false},
-  {id:"mind-robotics",name:"Mind Robotics",type:"Industrial Robot",hq:"Normal, IL",lat:40.5142,lng:-88.9906,status:"Private",funding:"$615M",valuation:"~$2B",thesis:"Rivian spinout. Industrial robots trained on EV factory data. $500M Series A.",url:"https://mindrobotics.com",il_covered:true},
-  {id:"softbank-robotics",name:"SoftBank / Exol",type:"Industrial Robot",hq:"Tokyo, Japan",lat:35.6762,lng:139.6503,status:"Private",funding:"SoftBank-owned",valuation:"Undisclosed",thesis:"65% owner of Exol (GreenBox) WaaS JV with Symbotic. $7.5B system contract.",url:"https://softbankrobotics.com",il_covered:true},
-  {id:"agibot",name:"AgiBot",type:"Humanoid",hq:"Shanghai, China",lat:31.2304,lng:121.4737,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"Chinese humanoid manufacturer scaling rapidly. Part of Nvidia's physical AI ecosystem.",url:"https://agibot.com",il_covered:false},
-  {id:"skild-ai",name:"Skild AI",type:"AI / Agents",hq:"Pittsburgh, PA",lat:40.4406,lng:-79.9959,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"Generalized robot intelligence platform. Partnered with ABB, Universal Robots, Foxconn.",url:"https://skild.ai",il_covered:false}
+  // HUMANOID
+  {name:"Figure AI",type:"Humanoid",hq:"San Jose, CA",lat:37.3382,lng:-121.8863,status:"Private",funding:"$1.9B",valuation:"$39B",thesis:"Best-capitalized US pure-play humanoid. Helix AI model is the real product.",url:"https://figure.ai",il_covered:true},
+  {name:"Tesla / Optimus",type:"Humanoid",hq:"Austin, TX",lat:30.2672,lng:-97.7431,status:"Public",ticker:"TSLA",funding:"Public",valuation:"~$750B",thesis:"Most vertically integrated player. If Optimus works at scale it becomes the largest robotics company by far.",url:"https://tesla.com",il_covered:true},
+  {name:"Apptronik",type:"Humanoid",hq:"Austin, TX",lat:30.3075,lng:-97.8934,status:"Private",funding:"$520M",valuation:"Undisclosed",thesis:"NASA heritage reliability. Modular design. $520M raise validates the thesis.",url:"https://apptronik.com",il_covered:true},
+  {name:"Boston Dynamics",type:"Humanoid",hq:"Waltham, MA",lat:42.3765,lng:-71.2356,status:"Private",funding:"Hyundai-owned",valuation:"Undisclosed",thesis:"Atlas entering production. 30,000 units targeted by 2028 for Hyundai factories.",url:"https://bostondynamics.com",il_covered:false},
+  {name:"Unitree Robotics",type:"Humanoid",hq:"Hangzhou, China",lat:30.2741,lng:120.1551,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"The price floor setter. G1 at $13,500 changes market dynamics for everyone.",url:"https://unitree.com",il_covered:true},
+  {name:"Agility Robotics",type:"Humanoid",hq:"Salem, OR",lat:44.9429,lng:-123.0351,status:"Private",funding:"$150M+",valuation:"Undisclosed",thesis:"Digit deployed in Amazon warehouses. First humanoid in production logistics.",url:"https://agilityrobotics.com",il_covered:false},
+  {name:"AgiBot",type:"Humanoid",hq:"Shanghai, China",lat:31.2304,lng:121.4737,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"Chinese humanoid manufacturer scaling rapidly. Part of Nvidia's physical AI ecosystem.",url:"https://agibot.com",il_covered:false},
+  {name:"1X Technologies",type:"Humanoid",hq:"Moss, Norway",lat:59.4340,lng:10.6580,status:"Private",funding:"$125M",valuation:"Undisclosed",thesis:"OpenAI-backed humanoid. NEO robot targeting commercial deployments in 2026.",url:"https://1x.tech",il_covered:false},
+  {name:"NEURA Robotics",type:"Humanoid",hq:"Metzingen, Germany",lat:48.5368,lng:9.2848,status:"Private",funding:"$120M",valuation:"Undisclosed",thesis:"German humanoid startup. MAiRA cognitive robot. Strong European manufacturing ties.",url:"https://neura-robotics.com",il_covered:false},
+  {name:"Aethon",type:"Humanoid",hq:"Pittsburgh, PA",lat:40.5148,lng:-79.9797,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"Autonomous mobile robots for hospitals and healthcare logistics.",url:"https://aethon.com",il_covered:false},
+  {name:"Sanctuary AI",type:"Humanoid",hq:"Vancouver, Canada",lat:49.2827,lng:-123.1207,status:"Private",funding:"$140M",valuation:"Undisclosed",thesis:"Phoenix humanoid robot. Carbon AI platform for general-purpose manipulation.",url:"https://sanctuary.ai",il_covered:false},
+  {name:"Fourier Intelligence",type:"Humanoid",hq:"Shanghai, China",lat:31.1500,lng:121.4000,status:"Private",funding:"$200M+",valuation:"Undisclosed",thesis:"GR-1 humanoid targeting rehabilitation and industrial use. China's fastest scaler.",url:"https://fourierintelligence.com",il_covered:false},
+  // INDUSTRIAL ROBOT
+  {name:"Intuitive Surgical",type:"Industrial Robot",hq:"Sunnyvale, CA",lat:37.3688,lng:-122.0363,status:"Public",ticker:"ISRG",funding:"Public",valuation:"~$190B",thesis:"The template for robotics monetization at scale. 10,763 systems globally.",url:"https://intuitivesurgical.com",il_covered:true},
+  {name:"Symbotic",type:"Industrial Robot",hq:"Wilmington, MA",lat:42.5584,lng:-71.1648,status:"Public",ticker:"SYM",funding:"Public",valuation:"~$8B",thesis:"Warehouse-as-a-Service pioneer. $22.5B backlog. The AWS model for logistics.",url:"https://symbotic.com",il_covered:true},
+  {name:"ABB Robotics",type:"Industrial Robot",hq:"Zurich, Switzerland",lat:47.3769,lng:8.5417,status:"Public",ticker:"ABB",funding:"Public",valuation:"~$90B",thesis:"Industrial robotics incumbent. NVIDIA partnership signals the software era is coming.",url:"https://abb.com",il_covered:true},
+  {name:"FANUC",type:"Industrial Robot",hq:"Oshino, Japan",lat:35.4781,lng:138.765,status:"Public",ticker:"6954.T",funding:"Public",valuation:"~$25B",thesis:"2M+ robots installed globally. Integrating Nvidia Isaac for AI-driven factory automation.",url:"https://fanuc.com",il_covered:false},
+  {name:"Yaskawa Electric",type:"Industrial Robot",hq:"Kitakyushu, Japan",lat:33.8834,lng:130.8751,status:"Public",ticker:"6506.T",funding:"Public",valuation:"~$8B",thesis:"Industrial robot incumbent. Part of Nvidia's global physical AI ecosystem.",url:"https://yaskawa.co.jp",il_covered:false},
+  {name:"KUKA",type:"Industrial Robot",hq:"Augsburg, Germany",lat:48.3705,lng:10.8978,status:"Public",ticker:"KU2.DE",funding:"Midea-owned",valuation:"~$3B",thesis:"European industrial robot giant. Chinese-owned. Integrating Nvidia Omniverse.",url:"https://kuka.com",il_covered:false},
+  {name:"Mind Robotics",type:"Industrial Robot",hq:"Normal, IL",lat:40.5142,lng:-88.9906,status:"Private",funding:"$615M",valuation:"~$2B",thesis:"Rivian spinout. Industrial robots trained on EV factory data. $500M Series A.",url:"https://mindrobotics.com",il_covered:true},
+  {name:"SoftBank / Exol",type:"Industrial Robot",hq:"Tokyo, Japan",lat:35.6762,lng:139.6503,status:"Private",funding:"SoftBank-owned",valuation:"Undisclosed",thesis:"65% owner of Exol (GreenBox) WaaS JV with Symbotic. $7.5B system contract.",url:"https://softbankrobotics.com",il_covered:true},
+  {name:"Universal Robots",type:"Industrial Robot",hq:"Odense, Denmark",lat:55.3959,lng:10.3883,status:"Private",funding:"Teradyne-owned",valuation:"Undisclosed",thesis:"Collaborative robot leader. 75,000+ cobots deployed globally. Integrating Skild AI.",url:"https://universal-robots.com",il_covered:false},
+  {name:"Comau",type:"Industrial Robot",hq:"Turin, Italy",lat:45.0703,lng:7.6869,status:"Private",funding:"Stellantis-owned",valuation:"Undisclosed",thesis:"European industrial automation. Partnered with Reis Robotics for shipbuilding and battery production.",url:"https://comau.com",il_covered:false},
+  {name:"Stäubli Robotics",type:"Industrial Robot",hq:"Pfäffikon, Switzerland",lat:47.2000,lng:8.7800,status:"Private",funding:"Private",valuation:"Undisclosed",thesis:"Precision robotics for pharma, textiles, and automotive. Clean-room specialist.",url:"https://staubli.com",il_covered:false},
+  {name:"Doosan Robotics",type:"Industrial Robot",hq:"Seoul, South Korea",lat:37.5665,lng:126.9780,status:"Public",ticker:"454910.KQ",funding:"Public",valuation:"~$1B",thesis:"South Korean cobot leader. Expanding into food service and healthcare automation.",url:"https://doosanrobotics.com",il_covered:false},
+  {name:"Brightpick",type:"Industrial Robot",hq:"New York, NY",lat:40.7580,lng:-73.9855,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"AI warehouse robots. The Feed running fully autonomous lights-out night shifts now.",url:"https://brightpick.ai",il_covered:true},
+  {name:"Hexagon Robotics",type:"Industrial Robot",hq:"Stockholm, Sweden",lat:59.3293,lng:18.0686,status:"Public",ticker:"HEXA-B.ST",funding:"Public",valuation:"~$20B",thesis:"Metrology and robotics. BMW Leipzig deployment. Integrating Nvidia Isaac Sim.",url:"https://hexagon.com",il_covered:false},
+  // AI / AGENTS
+  {name:"Physical Intelligence",type:"AI / Agents",hq:"San Francisco, CA",lat:37.7749,lng:-122.4194,status:"Private",funding:"$400M",valuation:"Undisclosed",thesis:"Building the foundation model for physical AI. The GPT moment for robot brains.",url:"https://physicalintelligence.company",il_covered:true},
+  {name:"Google DeepMind Robotics",type:"AI / Agents",hq:"London, UK",lat:51.5074,lng:-0.1278,status:"Public",funding:"Alphabet-owned",valuation:"Alphabet",thesis:"Gemini Robotics now deployed in Agile Robots' 20,000 global systems. Platform play.",url:"https://deepmind.google",il_covered:false},
+  {name:"Skild AI",type:"AI / Agents",hq:"Pittsburgh, PA",lat:40.4406,lng:-79.9959,status:"Private",funding:"$300M",valuation:"Undisclosed",thesis:"Generalized robot intelligence platform. Partnered with ABB, Universal Robots, Foxconn.",url:"https://skild.ai",il_covered:false},
+  {name:"Covariant",type:"AI / Agents",hq:"Emeryville, CA",lat:37.8316,lng:-122.2900,status:"Private",funding:"$222M",valuation:"Undisclosed",thesis:"RFM-1 robot foundation model. AI brain for warehouse picking and manipulation.",url:"https://covariant.ai",il_covered:false},
+  {name:"Rhoda AI",type:"AI / Agents",hq:"San Francisco, CA",lat:37.7800,lng:-122.4100,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"FutureVision video-predictive control for industrial robots. Series A March 2026.",url:"https://rhoda.ai",il_covered:false},
+  {name:"Microsoft Robotics",type:"AI / Agents",hq:"Redmond, WA",lat:47.6423,lng:-122.1301,status:"Public",ticker:"MSFT",funding:"Public",valuation:"~$3T",thesis:"Rho-alpha VLA model. Azure Robotics Accelerator. Positioning against Nvidia's Isaac.",url:"https://microsoft.com",il_covered:false},
+  // PICKS & SHOVELS
+  {name:"Nvidia",type:"Picks & Shovels",hq:"Santa Clara, CA",lat:37.3688,lng:-121.9641,status:"Public",ticker:"NVDA",funding:"Public",valuation:"~$2.9T",thesis:"The compute substrate for all physical AI. Wins regardless of who wins the hardware war.",url:"https://nvidia.com",il_covered:true},
+  {name:"TSMC",type:"Picks & Shovels",hq:"Hsinchu, Taiwan",lat:24.8138,lng:120.9675,status:"Public",ticker:"TSM",funding:"Public",valuation:"~$900B",thesis:"The most critical chokepoint in all of physical AI. Every robot chip runs through here.",url:"https://tsmc.com",il_covered:false},
+  {name:"Mobileye",type:"Picks & Shovels",hq:"Jerusalem, Israel",lat:31.7683,lng:35.2137,status:"Public",ticker:"MBLY",funding:"Public",valuation:"~$12B",thesis:"Autonomous vehicle vision chips. Expanding into robotics perception.",url:"https://mobileye.com",il_covered:false},
+  {name:"Cadence Design Systems",type:"Picks & Shovels",hq:"San Jose, CA",lat:37.3861,lng:-121.9784,status:"Public",ticker:"CDNS",funding:"Public",valuation:"~$65B",thesis:"$3.18B Hexagon acquisition closing 2026. Critical robotics simulation and EDA tooling.",url:"https://cadence.com",il_covered:false},
+  // SOFTWARE AUTOMATION
+  {name:"UiPath",type:"Software Automation",hq:"New York, NY",lat:40.7128,lng:-74.006,status:"Public",ticker:"PATH",funding:"Public",valuation:"~$7B",thesis:"RPA incumbent being commoditized by AI agents. Existential threat from LLMs.",url:"https://uipath.com",il_covered:true},
+  {name:"Automation Anywhere",type:"Software Automation",hq:"San Jose, CA",lat:37.3382,lng:-121.8863,status:"Private",funding:"$840M",valuation:"~$6.8B",thesis:"Enterprise RPA competing with AI agents. Pivoting toward agentic automation.",url:"https://automationanywhere.com",il_covered:false},
+  {name:"ServiceNow",type:"Software Automation",hq:"Santa Clara, CA",lat:37.3540,lng:-121.9552,status:"Public",ticker:"NOW",funding:"Public",valuation:"~$140B",thesis:"AI agents embedded in enterprise workflows. Anticipates AI bots causing fundamental shift in work.",url:"https://servicenow.com",il_covered:false},
+  {name:"Vention",type:"Software Automation",hq:"Montreal, Canada",lat:45.5017,lng:-73.5673,status:"Private",funding:"$95M",valuation:"Undisclosed",thesis:"No-code industrial automation platform. Nvidia Omniverse partner for digital twin manufacturing.",url:"https://vention.io",il_covered:false},
 ];
 
 const ROUTES=[
-  {fromLat:30.2741,fromLng:120.1551,toLat:33.9425,toLng:-118.4081,color:"#bf3318",label:"Unitree → US market"},
-  {fromLat:37.3688,fromLng:-121.9641,toLat:24.8138,toLng:120.9675,color:"#1D9E75",label:"Nvidia → TSMC fabrication"},
-  {fromLat:37.3382,fromLng:-121.8863,toLat:34.9496,toLng:-81.9321,color:"#378ADD",label:"Figure AI → BMW plant"},
-  {fromLat:42.5584,fromLng:-71.1648,toLat:36.3729,toLng:-94.2088,color:"#378ADD",label:"Symbotic → Walmart"},
-  {fromLat:42.5584,fromLng:-71.1648,toLat:30.3685,toLng:-89.7595,color:"#378ADD",label:"Symbotic → AWG Gulf Coast"},
-  {fromLat:48.3705,fromLng:10.8978,toLat:23.0219,toLng:113.1215,color:"#1D9E75",label:"KUKA → China manufacturing"},
-  {fromLat:47.3769,fromLng:8.5417,toLat:42.6872,toLng:-83.2344,color:"#378ADD",label:"ABB → US automotive"},
-  {fromLat:51.5074,fromLng:-0.1278,toLat:48.1351,toLng:11.5820,color:"#BA7517",label:"DeepMind → Agile Robots"}
+  {fromLat:30.2741,fromLng:120.1551,toLat:33.9425,toLng:-118.4081,color:"rgba(191,51,24,0.35)",label:"Unitree → US West Coast"},
+  {fromLat:30.2741,fromLng:120.1551,toLat:51.5,toLng:0.1,color:"rgba(191,51,24,0.35)",label:"Unitree → Europe"},
+  {fromLat:31.2304,fromLng:121.4737,toLat:33.9425,toLng:-118.4081,color:"rgba(191,51,24,0.35)",label:"AgiBot → US market"},
+  {fromLat:35.4781,fromLng:138.765,toLat:33.9425,toLng:-118.4081,color:"rgba(191,51,24,0.35)",label:"FANUC → US market"},
+  {fromLat:37.3688,fromLng:-121.9641,toLat:24.8138,toLng:120.9675,color:"rgba(29,158,117,0.35)",label:"Nvidia → TSMC fabrication"},
+  {fromLat:37.3688,fromLng:-121.9641,toLat:37.566,toLng:126.978,color:"rgba(29,158,117,0.35)",label:"Nvidia → Samsung Korea"},
+  {fromLat:48.3705,fromLng:10.8978,toLat:23.0219,toLng:113.1215,color:"rgba(29,158,117,0.35)",label:"KUKA → Foshan manufacturing"},
+  {fromLat:24.8138,fromLng:120.9675,toLat:37.3688,toLng:-121.9641,color:"rgba(29,158,117,0.35)",label:"TSMC → Nvidia delivery"},
+  {fromLat:24.8138,fromLng:120.9675,toLat:35.6762,toLng:139.6503,color:"rgba(29,158,117,0.35)",label:"TSMC → Japan customers"},
+  {fromLat:37.3382,fromLng:-121.8863,toLat:34.9496,toLng:-81.9321,color:"rgba(55,138,221,0.35)",label:"Figure AI → BMW Spartanburg"},
+  {fromLat:42.5584,fromLng:-71.1648,toLat:36.3729,toLng:-94.2088,color:"rgba(55,138,221,0.35)",label:"Symbotic → Walmart HQ"},
+  {fromLat:42.5584,fromLng:-71.1648,toLat:30.3685,toLng:-89.7595,color:"rgba(55,138,221,0.35)",label:"Symbotic → AWG Gulf Coast"},
+  {fromLat:44.9429,fromLng:-123.0351,toLat:47.6062,toLng:-122.3321,color:"rgba(55,138,221,0.35)",label:"Agility → Amazon Seattle"},
+  {fromLat:42.3765,fromLng:-71.2356,toLat:33.9374,toLng:-84.354,color:"rgba(55,138,221,0.35)",label:"Boston Dynamics → Hyundai Georgia"},
+  {fromLat:47.3769,fromLng:8.5417,toLat:48.1351,toLng:11.582,color:"rgba(55,138,221,0.35)",label:"ABB → BMW Munich"},
+  {fromLat:47.3769,fromLng:8.5417,toLat:51.5074,toLng:-0.1278,color:"rgba(55,138,221,0.35)",label:"ABB → UK operations"},
+  {fromLat:35.4781,fromLng:138.765,toLat:48.3705,toLng:10.8978,color:"rgba(55,138,221,0.35)",label:"FANUC → KUKA collaboration"},
+  {fromLat:55.3959,fromLng:10.3883,toLat:48.3705,toLng:10.8978,color:"rgba(186,117,23,0.35)",label:"Universal Robots → KUKA"},
+  {fromLat:51.5074,fromLng:-0.1278,toLat:48.1351,toLng:11.582,color:"rgba(186,117,23,0.35)",label:"DeepMind → Agile Robots"},
+  {fromLat:37.7749,fromLng:-122.4194,toLat:47.3769,toLng:8.5417,color:"rgba(186,117,23,0.35)",label:"Physical Intelligence → ABB"},
 ];
 
 const HUBS=[
-  {lat:31.2,lng:121.4,color:"#bf3318",label:"Shanghai robotics hub"},
-  {lat:37.4,lng:-122.0,color:"#7F77DD",label:"Silicon Valley AI hub"},
-  {lat:35.6,lng:139.7,color:"#1D9E75",label:"Tokyo industrial hub"},
-  {lat:48.5,lng:10.9,color:"#1D9E75",label:"Bavaria industrial hub"}
+  {lat:31.2,lng:121.4,color:"#bf3318",label:"Shanghai — China robotics hub"},
+  {lat:37.4,lng:-122.0,color:"#7F77DD",label:"Silicon Valley — AI hub"},
+  {lat:35.6,lng:139.7,color:"#1D9E75",label:"Tokyo — Japan industrial hub"},
+  {lat:48.5,lng:10.9,color:"#1D9E75",label:"Bavaria — European industrial hub"},
+  {lat:37.5,lng:127.0,color:"#EF9F27",label:"Seoul — #1 robot density globally"}
 ];
 
 let activeFilter='all';
 let isHovered=false;
+let densityOn=false;
+let sidebarVisible=true;
 let globe;
+let geoData=null;
+
+// Preload geo data
+fetch('https://unpkg.com/world-atlas@2/countries-110m.json')
+  .then(r=>r.json())
+  .then(topo=>{
+    // Convert topojson to geojson using a simple CDN
+    return fetch('https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js')
+      .then(r=>r.text())
+      .then(js=>{
+        const fn=new Function('exports',js+'\nreturn exports;');
+        const topojson=fn({});
+        geoData=topojson.feature(topo,topo.objects.countries);
+      });
+  }).catch(()=>{
+    // Fallback: use d3 world geojson directly
+    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
+      .then(r=>r.json())
+      .then(geo=>{geoData=geo;})
+      .catch(()=>{});
+  });
+
+// ISO numeric to alpha-3 mapping for density lookup
+// Name-based density lookup (more reliable than ISO codes across geojson sources)
+const NAME_DENSITY={
+  'South Korea':1012,'Korea':1012,'Republic of Korea':1012,
+  'Singapore':730,
+  'Germany':429,
+  'China':470,'Peoples Republic of China':470,
+  'Japan':419,
+  'Sweden':309,
+  'Taiwan':292,'Taiwan, Province of China':292,
+  'United States of America':285,'United States':285,'USA':285,
+  'Denmark':246,
+  'Italy':219,
+  'Belgium':218,
+  'Netherlands':209,
+  'Finland':197,
+  'Austria':193,
+  'Slovenia':185,
+  'Czech Republic':171,'Czechia':171,
+  'Spain':163,
+  'Slovakia':155,
+  'France':154,
+  'United Kingdom':126,'Great Britain':126,
+  'Hungary':125,
+  'Canada':118,
+  'Australia':96,
+  'India':55,
+  'Mexico':51,
+  'Brazil':23
+};
+
+function densityColor(name){
+  const d=NAME_DENSITY[name];
+  if(!d)return'rgba(0,0,0,0)';
+  const r=Math.min(d/1012,1);
+  // Much more visible — min 0.3 opacity, max 0.95
+  return`rgba(191,51,24,${(0.3+r*0.65).toFixed(2)})`;
+}
 
 function buildGlobe(){
   const el=document.getElementById('globe-canvas');
@@ -209,17 +349,17 @@ function buildGlobe(){
     .pointLat('lat').pointLng('lng')
     .pointColor(d=>TYPE_COLORS[d.type]||'#888')
     .pointAltitude(0.02)
-    .pointRadius(d=>d.il_covered?0.5:0.32)
+    .pointRadius(d=>d.il_covered?0.5:0.3)
     .pointLabel(d=>`<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:rgba(10,9,8,0.96);color:#f0ece2;padding:6px 10px;border:0.5px solid #2a2620;border-left:2px solid ${TYPE_COLORS[d.type]};pointer-events:none">${d.name}<br><span style="color:#5a5448;font-size:9px">${d.type} · ${d.hq}</span></div>`)
     .onPointClick(d=>openPanel(d))
     .arcsData(ROUTES)
     .arcStartLat('fromLat').arcStartLng('fromLng')
     .arcEndLat('toLat').arcEndLng('toLng')
     .arcColor('color')
-    .arcAltitudeAutoScale(0.35)
-    .arcStroke(0.6)
-    .arcDashLength(0.35)
-    .arcDashGap(0.15)
+    .arcAltitudeAutoScale(0.3)
+    .arcStroke(0.4)
+    .arcDashLength(0.3)
+    .arcDashGap(0.12)
     .arcDashAnimateTime(4000)
     .arcLabel(d=>`<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(10,9,8,0.96);color:#d4cfc3;padding:5px 9px;border:0.5px solid #2a2620;pointer-events:none">${d.label}</div>`)
     .ringsData(HUBS)
@@ -238,6 +378,53 @@ function buildGlobe(){
   wrap.addEventListener('mouseenter',()=>{isHovered=true;globe.controls().autoRotateSpeed=0.08;});
   wrap.addEventListener('mouseleave',()=>{isHovered=false;globe.controls().autoRotateSpeed=0.25;});
   window.addEventListener('resize',()=>{globe.width(el.offsetWidth).height(el.offsetHeight);});
+}
+
+function toggleDensity(){
+  densityOn=!densityOn;
+  document.getElementById('density-btn').classList.toggle('on',densityOn);
+  document.getElementById('density-status').classList.toggle('on',densityOn);
+  document.getElementById('density-legend').classList.toggle('on',densityOn);
+
+  if(densityOn && geoData){
+    applyDensityLayer(geoData);
+  } else if(densityOn && !geoData){
+    // Try fetching again
+    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
+      .then(r=>r.json())
+      .then(geo=>{
+        geoData=geo;
+        applyDensityLayer(geo);
+      })
+      .catch(()=>{
+        document.getElementById('density-status').textContent='Density data unavailable — try again';
+      });
+  } else {
+    globe.polygonsData([]);
+  }
+}
+
+function applyDensityLayer(geo){
+  const features=geo.features||geo;
+  globe
+    .polygonsData(features)
+    .polygonAltitude(0.006)
+    .polygonCapColor(f=>{
+      const name=f.properties.name||f.properties.NAME||f.properties.ADMIN||'';
+      return densityColor(name);
+    })
+    .polygonSideColor(f=>{
+      const name=f.properties.name||f.properties.NAME||f.properties.ADMIN||'';
+      const d=NAME_DENSITY[name];
+      return d?`rgba(191,51,24,0.3)`:'rgba(0,0,0,0)';
+    })
+    .polygonStrokeColor(()=>'rgba(191,51,24,0.15)')
+    .polygonLabel(f=>{
+      const name=f.properties.name||f.properties.NAME||f.properties.ADMIN||'';
+      const d=NAME_DENSITY[name];
+      if(!d)return`<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(10,9,8,0.96);color:#3a3630;padding:5px 9px;border:0.5px solid #1a1814;pointer-events:none">${name}<br><span style="font-size:8px;color:#2a2620">No data</span></div>`;
+      return`<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:rgba(10,9,8,0.96);color:#f0ece2;padding:7px 11px;border:0.5px solid #2a2620;border-left:3px solid #bf3318;pointer-events:none"><span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#bf3318;display:block;line-height:1">${d}</span>robots per 10,000 workers<br><span style="color:#5a5448;font-size:9px">${name} · IFR 2024</span></div>`;
+    });
 }
 
 function openPanel(c){
@@ -278,8 +465,16 @@ function setFilter(type,btn){
     .pointLat('lat').pointLng('lng')
     .pointColor(d=>TYPE_COLORS[d.type]||'#888')
     .pointAltitude(0.02)
-    .pointRadius(d=>d.il_covered?0.5:0.32);
+    .pointRadius(d=>d.il_covered?0.5:0.3);
   document.getElementById('stat-companies').textContent=f.length;
+}
+
+function toggleSidebar(){
+  sidebarVisible=!sidebarVisible;
+  const sb=document.getElementById('sidebar');
+  const btn=document.getElementById('sidebar-toggle');
+  sb.classList.toggle('hidden',!sidebarVisible);
+  btn.textContent=sidebarVisible?'▶':'◀';
 }
 
 document.getElementById('search').addEventListener('input',function(){
