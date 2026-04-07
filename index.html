@@ -640,7 +640,14 @@ function toggleShips(){
     btn.textContent = '⛵ Live Ships';
     status.classList.remove('on');
     legend.style.display = 'none';
-    globe.customLayerData([]).customThreeObject(null);
+    // Restore company-only points
+    const f = activeFilter==='all' ? COMPANIES : COMPANIES.filter(c=>c.type===activeFilter);
+    globe.pointsData(f)
+      .pointLat('lat').pointLng('lng')
+      .pointColor(d=>TYPE_COLORS[d.type]||'#888')
+      .pointAltitude(0.02)
+      .pointRadius(d=>d.il_covered?0.5:0.3)
+      .onPointClick(d=>openPanel(d));
     shipData = {};
   }
 }
@@ -710,35 +717,33 @@ function disconnectAIS(){
 function renderShips(){
   const ships = Object.values(shipData).filter(s => s.lat && s.lng);
   document.getElementById('ship-count').textContent = ships.length + ' vessels tracked';
+  if(!ships.length) return;
 
-  // Use globe labels for ships (lightweight)
   const shipPoints = ships.map(s => ({
     lat: s.lat,
     lng: s.lng,
-    name: s.name || 'Unknown',
-    dest: s.dest || '—',
-    speed: s.speed || 0,
-    color: SHIP_TYPE_COLOR(s.typeCode || 0),
-    isShip: true
+    name: (s.name||'Unknown').trim(),
+    dest: (s.dest||'—').trim(),
+    speed: s.speed||0,
+    color: SHIP_TYPE_COLOR(s.typeCode||0),
   }));
 
-  // Merge with company points - keep companies on top
-  const companyPoints = (activeFilter === 'all' ? COMPANIES : COMPANIES.filter(c => c.type === activeFilter));
-  
-  // Render ship layer separately using a second points layer trick
-  // We use htmlElements for ships to keep them visually distinct
-  globe.labelsData(shipPoints)
-    .labelLat('lat')
-    .labelLng('lng')
-    .labelText(d => '')
-    .labelSize(0)
-    .labelDotRadius(0.2)
-    .labelColor(d => d.color)
-    .labelAltitude(0.005)
-    .labelLabel(d => `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(10,9,8,0.96);color:#f0ece2;padding:5px 9px;border:0.5px solid #2a2620;border-left:2px solid ${d.color};pointer-events:none">
-      <strong style="color:${d.color}">${d.name}</strong><br>
-      <span style="color:#5a5448;font-size:8px">→ ${d.dest} · ${d.speed.toFixed(1)} kts</span>
-    </div>`);
+  // Combine companies + ships into one points layer
+  const companyPoints = (activeFilter==='all' ? COMPANIES : COMPANIES.filter(c=>c.type===activeFilter));
+  const allPoints = [
+    ...companyPoints.map(c=>({...c, isShip:false})),
+    ...shipPoints.map(s=>({...s, isShip:true}))
+  ];
+
+  globe.pointsData(allPoints)
+    .pointLat('lat').pointLng('lng')
+    .pointColor(d => d.isShip ? d.color : (TYPE_COLORS[d.type]||'#888'))
+    .pointAltitude(d => d.isShip ? 0.008 : 0.02)
+    .pointRadius(d => d.isShip ? 0.18 : (d.il_covered ? 0.5 : 0.3))
+    .pointLabel(d => d.isShip
+      ? `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(10,9,8,0.96);color:#f0ece2;padding:5px 9px;border:0.5px solid #2a2620;border-left:2px solid ${d.color};pointer-events:none"><strong style="color:${d.color}">${d.name}</strong><br><span style="color:#5a5448;font-size:8px">→ ${d.dest} · ${d.speed.toFixed(1)} kts</span></div>`
+      : `<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:rgba(10,9,8,0.96);color:#f0ece2;padding:6px 10px;border:0.5px solid #2a2620;border-left:2px solid ${TYPE_COLORS[d.type]};pointer-events:none">${d.name}<br><span style="color:#5a5448;font-size:9px">${d.type} · ${d.hq}</span></div>`)
+    .onPointClick(d => { if(!d.isShip) openPanel(d); });
 }
 
 buildGlobe();
