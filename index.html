@@ -700,9 +700,11 @@ function connectAIS(){
         shipData[mmsi].dest = (st.Destination || '—').trim();
         shipData[mmsi].typeCode = st.Type || 0;
       }
-      // Update count live
+      // Update count and render live
       const count = Object.values(shipData).filter(s=>s.lat&&s.lng).length;
       document.getElementById('ship-count').textContent = count + ' vessels tracked';
+      // Render immediately on first ship, then every 10 messages
+      if(count === 1 || msgCount % 10 === 0) renderShips();
     }catch(e){ console.error('AIS parse error:', e); }
   };
 
@@ -748,8 +750,8 @@ function renderShips(){
   globe.pointsData(allPoints)
     .pointLat('lat').pointLng('lng')
     .pointColor(d => d.isShip ? d.color : (TYPE_COLORS[d.type]||'#888'))
-    .pointAltitude(d => d.isShip ? 0.008 : 0.02)
-    .pointRadius(d => d.isShip ? 0.18 : (d.il_covered ? 0.5 : 0.3))
+    .pointAltitude(d => d.isShip ? 0.025 : 0.02)
+    .pointRadius(d => d.isShip ? 0.35 : (d.il_covered ? 0.5 : 0.3))
     .pointLabel(d => d.isShip
       ? `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(10,9,8,0.96);color:#f0ece2;padding:5px 9px;border:0.5px solid #2a2620;border-left:2px solid ${d.color};pointer-events:none"><strong style="color:${d.color}">${d.name}</strong><br><span style="color:#5a5448;font-size:8px">→ ${d.dest} · ${d.speed.toFixed(1)} kts</span></div>`
       : `<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:rgba(10,9,8,0.96);color:#f0ece2;padding:6px 10px;border:0.5px solid #2a2620;border-left:2px solid ${TYPE_COLORS[d.type]};pointer-events:none">${d.name}<br><span style="color:#5a5448;font-size:9px">${d.type} · ${d.hq}</span></div>`)
