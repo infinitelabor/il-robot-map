@@ -671,20 +671,27 @@ function connectAIS(){
     shipUpdateTimer = setInterval(renderShips, 5000);
   };
 
+  let msgCount = 0;
   shipSocket.onmessage = (event) => {
     try{
       const msg = JSON.parse(event.data);
+      msgCount++;
+      // Log first 3 messages to console for debugging
+      if(msgCount <= 3) console.log('AIS msg:', JSON.stringify(msg).substring(0,300));
+
       const meta = msg.MetaData || {};
-      const mmsi = String(meta.MMSI || '');
+      const mmsi = String(meta.MMSI || meta.ShipMmsi || '');
       if(!mmsi) return;
 
       if(msg.MessageType === 'PositionReport'){
         const pos = msg.Message?.PositionReport || {};
+        const lat = pos.Latitude ?? meta.latitude_d;
+        const lng = pos.Longitude ?? meta.longitude_d;
+        if(lat == null || lng == null) return;
         if(!shipData[mmsi]) shipData[mmsi] = {};
-        shipData[mmsi].lat = pos.Latitude || meta.latitude_d;
-        shipData[mmsi].lng = pos.Longitude || meta.longitude_d;
+        shipData[mmsi].lat = lat;
+        shipData[mmsi].lng = lng;
         shipData[mmsi].speed = pos.Sog || 0;
-        shipData[mmsi].heading = pos.TrueHeading || 0;
       }
       if(msg.MessageType === 'ShipStaticData'){
         const st = msg.Message?.ShipStaticData || {};
@@ -693,7 +700,10 @@ function connectAIS(){
         shipData[mmsi].dest = (st.Destination || '—').trim();
         shipData[mmsi].typeCode = st.Type || 0;
       }
-    }catch(e){}
+      // Update count live
+      const count = Object.values(shipData).filter(s=>s.lat&&s.lng).length;
+      document.getElementById('ship-count').textContent = count + ' vessels tracked';
+    }catch(e){ console.error('AIS parse error:', e); }
   };
 
   shipSocket.onerror = () => {
