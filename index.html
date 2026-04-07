@@ -31,6 +31,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 .density-btn{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:5px 8px;border:0.5px solid rgba(191,51,24,0.3);cursor:pointer;background:transparent;color:#bf3318;transition:all 0.15s;margin-left:3px;flex-shrink:0}
 .density-btn:hover{background:rgba(191,51,24,0.1)}
 .density-btn.on{background:rgba(191,51,24,0.18);border-color:var(--red);color:#f06040}
+.ships-btn{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:5px 8px;border:0.5px solid rgba(55,138,221,0.3);cursor:pointer;background:transparent;color:#378ADD;transition:all 0.15s;margin-left:3px;flex-shrink:0;white-space:nowrap}
+.ships-btn:hover{background:rgba(55,138,221,0.1)}
+.ships-btn.on{background:rgba(55,138,221,0.18);border-color:#378ADD;color:#6ab8ff}
+.ships-btn.connecting{color:#BA7517;border-color:rgba(186,117,23,0.4);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.ship-status{position:fixed;top:62px;right:310px;background:rgba(55,138,221,0.15);border:0.5px solid rgba(55,138,221,0.4);padding:5px 14px;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#378ADD;display:none;z-index:80}
+.ship-status.on{display:block}
 .header-sub{padding:0 14px;font-size:8px;color:#3a3630;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
 .header-sub a{color:var(--red);text-decoration:none}
 .header-sub a:hover{text-decoration:underline}
@@ -137,12 +144,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
     <button class="filter-btn" data-type="Picks & Shovels" onclick="setFilter('Picks & Shovels',this)">Infra</button>
     <button class="filter-btn" data-type="Software Automation" onclick="setFilter('Software Automation',this)">Software</button>
     <button class="density-btn" id="density-btn" onclick="toggleDensity()">⬡ Density</button>
+    <button class="ships-btn" id="ships-btn" onclick="toggleShips()">⛵ Live Ships</button>
   </div>
   <div class="header-sub">
     <a href="https://infinitelabor.substack.com" target="_blank">Subscribe →</a>
   </div>
 </div>
 
+<div class="ship-status" id="ship-status">⛵ Live cargo ships — hover for vessel details</div>
 <div class="density-status" id="density-status">⬡ Robot density active — darker red = more robots per worker. Hover any country for the number.</div>
 
 <div class="layout">
@@ -162,6 +171,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
         <div class="legend-item"><div class="legend-line" style="background:#1D9E75"></div>Mfg</div>
         <div class="legend-item"><div class="legend-line" style="background:#378ADD"></div>Deployment</div>
         <div class="legend-item"><div class="legend-line" style="background:#BA7517"></div>Partnership</div>
+      </div>
+      <div class="ships-legend" id="ships-legend" style="margin-top:7px;padding-top:7px;border-top:0.5px solid #1a1814;display:none">
+        <div class="legend-title">Live ships</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#378ADD;opacity:0.8"></div>Cargo vessel</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#6ab8ff;opacity:0.8"></div>Tanker</div>
+        <div class="legend-item" style="font-size:7px;color:#2a2620;margin-top:3px" id="ship-count">0 vessels tracked</div>
       </div>
       <div class="density-legend" id="density-legend">
         <div class="legend-title">Robots / 10k workers</div>
@@ -575,6 +590,155 @@ async function loadFeed(){
   const feed=document.getElementById('news-feed');
   if(!items.length){feed.innerHTML='<div class="news-loading">Feed unavailable — try again shortly.</div>';return;}
   feed.innerHTML=items.map(i=>`<a class="news-item" href="${i.link}" target="_blank" rel="noopener"><div class="news-source">${i.source}</div><div class="news-hed">${i.title}</div><div class="news-time">${timeAgo(i.date)}</div></a>`).join('');
+}
+
+// ── LIVE SHIPS (AIS) ─────────────────────────────────────────────────────────
+// Get your FREE API key at aisstream.io — takes 2 minutes
+const AIS_API_KEY = 'a13c07cd7dff28a9a94e4413eabba3b21d0bab9a';
+
+// Bounding boxes covering major robotics supply chain shipping lanes:
+// East China Sea, South China Sea, Pacific, US West Coast, Strait of Malacca, North Sea
+const SHIP_BOXES = [
+  [[20, 115], [40, 130]],    // East China Sea (China/Japan/Korea exports)
+  [[1, 100],  [15, 115]],    // Strait of Malacca (global chokepoint)
+  [[30, -130],[50, -115]],   // US West Coast approach
+  [[-5, 95],  [25, 115]],    // South China Sea
+  [[50, -10], [60, 10]],     // North Sea (Europe)
+  [[35, 25],  [45, 40]],     // Eastern Mediterranean
+];
+
+let shipsOn = false;
+let shipSocket = null;
+let shipData = {};  // mmsi -> {lat, lng, name, dest, speed, type}
+let shipUpdateTimer = null;
+
+const SHIP_TYPE_COLOR = (typeCode) => {
+  if(typeCode>=70&&typeCode<=79) return '#378ADD'; // cargo
+  if(typeCode>=80&&typeCode<=89) return '#6ab8ff'; // tanker
+  if(typeCode>=60&&typeCode<=69) return '#BA7517'; // passenger
+  return '#4a8acc';
+};
+
+function toggleShips(){
+  shipsOn = !shipsOn;
+  const btn = document.getElementById('ships-btn');
+  const status = document.getElementById('ship-status');
+  const legend = document.getElementById('ships-legend');
+
+  if(shipsOn){
+    if(AIS_API_KEY === 'a13c07cd7dff28a9a94e4413eabba3b21d0bab9a'){
+      alert('Add your free AIS API key from aisstream.io to enable live ships.');
+      shipsOn = false;
+      return;
+    }
+    btn.classList.add('connecting');
+    btn.textContent = '⛵ Connecting...';
+    connectAIS();
+  } else {
+    disconnectAIS();
+    btn.classList.remove('on','connecting');
+    btn.textContent = '⛵ Live Ships';
+    status.classList.remove('on');
+    legend.style.display = 'none';
+    globe.customLayerData([]).customThreeObject(null);
+    shipData = {};
+  }
+}
+
+function connectAIS(){
+  if(shipSocket) shipSocket.close();
+  shipSocket = new WebSocket('wss://stream.aisstream.io/v0/stream');
+
+  shipSocket.onopen = () => {
+    shipSocket.send(JSON.stringify({
+      Apikey: AIS_API_KEY,
+      BoundingBoxes: SHIP_BOXES,
+      FilterMessageTypes: ['PositionReport','ShipStaticData']
+    }));
+    document.getElementById('ships-btn').classList.remove('connecting');
+    document.getElementById('ships-btn').classList.add('on');
+    document.getElementById('ships-btn').textContent = '⛵ Ships Live';
+    document.getElementById('ship-status').classList.add('on');
+    document.getElementById('ships-legend').style.display = 'block';
+    // Start rendering ships every 5 seconds
+    shipUpdateTimer = setInterval(renderShips, 5000);
+  };
+
+  shipSocket.onmessage = (event) => {
+    try{
+      const msg = JSON.parse(event.data);
+      const meta = msg.MetaData || {};
+      const mmsi = String(meta.MMSI || '');
+      if(!mmsi) return;
+
+      if(msg.MessageType === 'PositionReport'){
+        const pos = msg.Message?.PositionReport || {};
+        if(!shipData[mmsi]) shipData[mmsi] = {};
+        shipData[mmsi].lat = pos.Latitude || meta.latitude_d;
+        shipData[mmsi].lng = pos.Longitude || meta.longitude_d;
+        shipData[mmsi].speed = pos.Sog || 0;
+        shipData[mmsi].heading = pos.TrueHeading || 0;
+      }
+      if(msg.MessageType === 'ShipStaticData'){
+        const st = msg.Message?.ShipStaticData || {};
+        if(!shipData[mmsi]) shipData[mmsi] = {};
+        shipData[mmsi].name = (meta.ShipName || st.Name || 'Unknown').trim();
+        shipData[mmsi].dest = (st.Destination || '—').trim();
+        shipData[mmsi].typeCode = st.Type || 0;
+      }
+    }catch(e){}
+  };
+
+  shipSocket.onerror = () => {
+    document.getElementById('ships-btn').classList.remove('connecting','on');
+    document.getElementById('ships-btn').textContent = '⛵ Ships Error';
+  };
+
+  shipSocket.onclose = () => {
+    if(shipsOn){
+      // Auto-reconnect after 5s
+      setTimeout(connectAIS, 5000);
+    }
+  };
+}
+
+function disconnectAIS(){
+  if(shipSocket){ shipSocket.close(); shipSocket = null; }
+  if(shipUpdateTimer){ clearInterval(shipUpdateTimer); shipUpdateTimer = null; }
+}
+
+function renderShips(){
+  const ships = Object.values(shipData).filter(s => s.lat && s.lng);
+  document.getElementById('ship-count').textContent = ships.length + ' vessels tracked';
+
+  // Use globe labels for ships (lightweight)
+  const shipPoints = ships.map(s => ({
+    lat: s.lat,
+    lng: s.lng,
+    name: s.name || 'Unknown',
+    dest: s.dest || '—',
+    speed: s.speed || 0,
+    color: SHIP_TYPE_COLOR(s.typeCode || 0),
+    isShip: true
+  }));
+
+  // Merge with company points - keep companies on top
+  const companyPoints = (activeFilter === 'all' ? COMPANIES : COMPANIES.filter(c => c.type === activeFilter));
+  
+  // Render ship layer separately using a second points layer trick
+  // We use htmlElements for ships to keep them visually distinct
+  globe.labelsData(shipPoints)
+    .labelLat('lat')
+    .labelLng('lng')
+    .labelText(d => '')
+    .labelSize(0)
+    .labelDotRadius(0.2)
+    .labelColor(d => d.color)
+    .labelAltitude(0.005)
+    .labelLabel(d => `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(10,9,8,0.96);color:#f0ece2;padding:5px 9px;border:0.5px solid #2a2620;border-left:2px solid ${d.color};pointer-events:none">
+      <strong style="color:${d.color}">${d.name}</strong><br>
+      <span style="color:#5a5448;font-size:8px">→ ${d.dest} · ${d.speed.toFixed(1)} kts</span>
+    </div>`);
 }
 
 buildGlobe();
