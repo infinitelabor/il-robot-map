@@ -36,7 +36,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 .header-sub a{color:var(--red);text-decoration:none}
 .header-sub a:hover{text-decoration:underline}
 
-.layout{position:fixed;top:52px;left:0;right:0;bottom:0;display:flex}
+.layout{position:fixed;top:80px;left:0;right:0;bottom:0;display:flex}
 .globe-container{flex:1;position:relative;overflow:hidden}
 #globe-canvas{width:100%;height:100%}
 
@@ -113,8 +113,42 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 .stat-pill-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#2a2620;display:block;margin-top:1px}
 
 /* DENSITY STATUS */
-.density-status{position:absolute;top:62px;left:50%;transform:translateX(-50%);background:rgba(191,51,24,0.15);border:0.5px solid rgba(191,51,24,0.4);padding:5px 14px;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#bf3318;display:none;z-index:80}
+.density-status{position:absolute;top:90px;left:50%;transform:translateX(-50%);background:rgba(191,51,24,0.15);border:0.5px solid rgba(191,51,24,0.4);padding:5px 14px;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#bf3318;display:none;z-index:80}
 .density-status.on{display:block}
+
+/* TICKER TAPE */
+.ticker-wrap{width:100%;background:#080706;border-bottom:1px solid #1a1814;height:28px;overflow:hidden;position:relative;z-index:90}
+.ticker-track{display:flex;width:max-content;animation:tickerScroll 90s linear infinite;align-items:center;height:28px}
+.ticker-track:hover{animation-play-state:paused}
+.ticker-item{display:flex;align-items:center;gap:6px;padding:0 18px;font-family:var(--mono);font-size:10px;white-space:nowrap;cursor:default}
+.ticker-sym{color:#5a5448;letter-spacing:1px;font-size:9px}
+.ticker-price{color:#f0ece2}
+.ticker-chg.up{color:#1D9E75}
+.ticker-chg.down{color:#E24B4A}
+.ticker-chg.flat{color:#5a5448}
+.ticker-dot{color:#2a2620;margin:0 4px}
+.ticker-loading{font-family:var(--mono);font-size:9px;color:#3a3630;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;height:28px;padding:0 16px}
+@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+
+/* IL WATCHLIST TOGGLE */
+.watchlist-btn{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:5px 8px;border:0.5px solid rgba(239,159,39,0.3);cursor:pointer;background:transparent;color:#EF9F27;transition:all 0.15s;margin-left:3px;flex-shrink:0;white-space:nowrap}
+.watchlist-btn:hover{background:rgba(239,159,39,0.1)}
+.watchlist-btn.on{background:rgba(239,159,39,0.18);border-color:#EF9F27;color:#f5c060}
+
+/* TIMELINE SLIDER */
+.timeline{position:absolute;bottom:58px;left:50%;transform:translateX(-50%);background:rgba(10,9,8,0.93);border:0.5px solid #1a1814;padding:8px 16px;display:flex;align-items:center;gap:10px;z-index:80;white-space:nowrap}
+.timeline-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#3a3630}
+.timeline-year{font-family:var(--display);font-size:18px;color:#f0ece2;letter-spacing:1px;min-width:44px;text-align:center}
+.timeline-slider{-webkit-appearance:none;appearance:none;width:200px;height:2px;background:#2a2620;outline:none;cursor:pointer}
+.timeline-slider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--red);cursor:pointer}
+.timeline-slider::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--red);cursor:pointer;border:none}
+.timeline-reset{font-family:var(--mono);font-size:8px;color:#3a3630;cursor:pointer;letter-spacing:1px;background:none;border:none;padding:0}
+.timeline-reset:hover{color:#f0ece2}
+.timeline.hidden{display:none}
+.timeline-btn{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:5px 8px;border:0.5px solid rgba(127,119,221,0.3);cursor:pointer;background:transparent;color:#7F77DD;transition:all 0.15s;margin-left:3px;flex-shrink:0;white-space:nowrap}
+.timeline-btn:hover{background:rgba(127,119,221,0.1)}
+.timeline-btn.on{background:rgba(127,119,221,0.18);border-color:#7F77DD}
 </style>
 </head>
 <body>
@@ -138,13 +172,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
     <button class="filter-btn" data-type="Picks & Shovels" onclick="setFilter('Picks & Shovels',this)">Infra</button>
     <button class="filter-btn" data-type="Software Automation" onclick="setFilter('Software Automation',this)">Software</button>
     <button class="density-btn" id="density-btn" onclick="toggleDensity()">⬡ Density</button>
+    <button class="watchlist-btn" id="watchlist-btn" onclick="toggleWatchlist(this)">★ IL Watchlist</button>
+    <button class="timeline-btn" id="timeline-btn" onclick="toggleTimeline(this)">⏱ Timeline</button>
   </div>
   <div class="header-sub">
     <a href="https://infinitelabor.substack.com" target="_blank">Subscribe →</a>
   </div>
 </div>
 
+<div class="ticker-wrap" id="ticker-wrap">
+  <div class="ticker-loading" id="ticker-loading">Loading market data...</div>
+  <div class="ticker-track" id="ticker-track" style="display:none"></div>
+</div>
 <div class="density-status" id="density-status">⬡ Robot density active — darker red = more robots per worker. Hover any country for the number.</div>
+
+
+<div class="timeline hidden" id="timeline">
+  <span class="timeline-label">Founded</span>
+  <span class="timeline-year" id="timeline-year">All</span>
+  <input type="range" class="timeline-slider" id="timeline-slider" min="1890" max="2026" value="2026" step="1" oninput="onTimelineSlide(this.value)">
+  <button class="timeline-reset" onclick="resetTimeline()">Reset</button>
+</div>
 
 <div class="layout">
   <div class="globe-container" id="globe-wrap">
@@ -210,100 +258,100 @@ const DENSITY={
 
 const COMPANIES=[
   // HUMANOID
-  {name:"Figure AI",type:"Humanoid",hq:"San Jose, CA",lat:37.3382,lng:-121.8863,status:"Private",funding:"$1.9B",valuation:"$39B",thesis:"Best-capitalized US pure-play humanoid. Helix AI model is the real product.",url:"https://figure.ai",il_covered:true},
-  {name:"Tesla / Optimus",type:"Humanoid",hq:"Austin, TX",lat:30.2672,lng:-97.7431,status:"Public",ticker:"TSLA",funding:"Public",valuation:"~$750B",thesis:"Most vertically integrated player. If Optimus works at scale it becomes the largest robotics company by far.",url:"https://tesla.com",il_covered:true},
-  {name:"Apptronik",type:"Humanoid",hq:"Austin, TX",lat:30.3075,lng:-97.8934,status:"Private",funding:"$520M",valuation:"Undisclosed",thesis:"NASA heritage reliability. Modular design. $520M raise validates the thesis.",url:"https://apptronik.com",il_covered:true},
-  {name:"Boston Dynamics",type:"Humanoid",hq:"Waltham, MA",lat:42.3765,lng:-71.2356,status:"Private",funding:"Hyundai-owned",valuation:"Undisclosed",thesis:"Atlas entering production. 30,000 units targeted by 2028 for Hyundai factories.",url:"https://bostondynamics.com",il_covered:false},
-  {name:"Unitree Robotics",type:"Humanoid",hq:"Hangzhou, China",lat:30.2741,lng:120.1551,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"The price floor setter. G1 at $13,500 changes market dynamics for everyone.",url:"https://unitree.com",il_covered:true},
-  {name:"Agility Robotics",type:"Humanoid",hq:"Salem, OR",lat:44.9429,lng:-123.0351,status:"Private",funding:"$150M+",valuation:"Undisclosed",thesis:"Digit deployed in Amazon warehouses. First humanoid in production logistics.",url:"https://agilityrobotics.com",il_covered:false},
-  {name:"AgiBot",type:"Humanoid",hq:"Shanghai, China",lat:31.2304,lng:121.4737,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"Chinese humanoid manufacturer scaling rapidly. Part of Nvidia's physical AI ecosystem.",url:"https://agibot.com",il_covered:false},
-  {name:"1X Technologies",type:"Humanoid",hq:"Moss, Norway",lat:59.4340,lng:10.6580,status:"Private",funding:"$125M",valuation:"Undisclosed",thesis:"OpenAI-backed humanoid. NEO robot targeting commercial deployments in 2026.",url:"https://1x.tech",il_covered:false},
-  {name:"NEURA Robotics",type:"Humanoid",hq:"Metzingen, Germany",lat:48.5368,lng:9.2848,status:"Private",funding:"$120M",valuation:"Undisclosed",thesis:"German humanoid startup. MAiRA cognitive robot. Strong European manufacturing ties.",url:"https://neura-robotics.com",il_covered:false},
-  {name:"Aethon",type:"Humanoid",hq:"Pittsburgh, PA",lat:40.5148,lng:-79.9797,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"Autonomous mobile robots for hospitals and healthcare logistics.",url:"https://aethon.com",il_covered:false},
-  {name:"Sanctuary AI",type:"Humanoid",hq:"Vancouver, Canada",lat:49.2827,lng:-123.1207,status:"Private",funding:"$140M",valuation:"Undisclosed",thesis:"Phoenix humanoid robot. Carbon AI platform for general-purpose manipulation.",url:"https://sanctuary.ai",il_covered:false},
-  {name:"Fourier Intelligence",type:"Humanoid",hq:"Shanghai, China",lat:31.1500,lng:121.4000,status:"Private",funding:"$200M+",valuation:"Undisclosed",thesis:"GR-1 humanoid targeting rehabilitation and industrial use. China's fastest scaler.",url:"https://fourierintelligence.com",il_covered:false},
+  {name:"Figure AI",year:2022,type:"Humanoid",hq:"San Jose, CA",lat:37.3382,lng:-121.8863,status:"Private",funding:"$1.9B",valuation:"$39B",thesis:"Best-capitalized US pure-play humanoid. Helix AI model is the real product.",url:"https://figure.ai",il_covered:true},
+  {name:"Tesla / Optimus",year:2021,type:"Humanoid",hq:"Austin, TX",lat:30.2672,lng:-97.7431,status:"Public",ticker:"TSLA",funding:"Public",valuation:"~$750B",thesis:"Most vertically integrated player. If Optimus works at scale it becomes the largest robotics company by far.",url:"https://tesla.com",il_covered:true},
+  {name:"Apptronik",year:2016,type:"Humanoid",hq:"Austin, TX",lat:30.3075,lng:-97.8934,status:"Private",funding:"$520M",valuation:"Undisclosed",thesis:"NASA heritage reliability. Modular design. $520M raise validates the thesis.",url:"https://apptronik.com",il_covered:true},
+  {name:"Boston Dynamics",year:1992,type:"Humanoid",hq:"Waltham, MA",lat:42.3765,lng:-71.2356,status:"Private",funding:"Hyundai-owned",valuation:"Undisclosed",thesis:"Atlas entering production. 30,000 units targeted by 2028 for Hyundai factories.",url:"https://bostondynamics.com",il_covered:false},
+  {name:"Unitree Robotics",year:2016,type:"Humanoid",hq:"Hangzhou, China",lat:30.2741,lng:120.1551,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"The price floor setter. G1 at $13,500 changes market dynamics for everyone.",url:"https://unitree.com",il_covered:true},
+  {name:"Agility Robotics",year:2015,type:"Humanoid",hq:"Salem, OR",lat:44.9429,lng:-123.0351,status:"Private",funding:"$150M+",valuation:"Undisclosed",thesis:"Digit deployed in Amazon warehouses. First humanoid in production logistics.",url:"https://agilityrobotics.com",il_covered:false},
+  {name:"AgiBot",year:2023,type:"Humanoid",hq:"Shanghai, China",lat:31.2304,lng:121.4737,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"Chinese humanoid manufacturer scaling rapidly. Part of Nvidia's physical AI ecosystem.",url:"https://agibot.com",il_covered:false},
+  {name:"1X Technologies",year:2014,type:"Humanoid",hq:"Moss, Norway",lat:59.4340,lng:10.6580,status:"Private",funding:"$125M",valuation:"Undisclosed",thesis:"OpenAI-backed humanoid. NEO robot targeting commercial deployments in 2026.",url:"https://1x.tech",il_covered:false},
+  {name:"NEURA Robotics",year:2019,type:"Humanoid",hq:"Metzingen, Germany",lat:48.5368,lng:9.2848,status:"Private",funding:"$120M",valuation:"Undisclosed",thesis:"German humanoid startup. MAiRA cognitive robot. Strong European manufacturing ties.",url:"https://neura-robotics.com",il_covered:false},
+  {name:"Aethon",year:2001,type:"Humanoid",hq:"Pittsburgh, PA",lat:40.5148,lng:-79.9797,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"Autonomous mobile robots for hospitals and healthcare logistics.",url:"https://aethon.com",il_covered:false},
+  {name:"Sanctuary AI",year:2018,type:"Humanoid",hq:"Vancouver, Canada",lat:49.2827,lng:-123.1207,status:"Private",funding:"$140M",valuation:"Undisclosed",thesis:"Phoenix humanoid robot. Carbon AI platform for general-purpose manipulation.",url:"https://sanctuary.ai",il_covered:false},
+  {name:"Fourier Intelligence",year:2015,type:"Humanoid",hq:"Shanghai, China",lat:31.1500,lng:121.4000,status:"Private",funding:"$200M+",valuation:"Undisclosed",thesis:"GR-1 humanoid targeting rehabilitation and industrial use. China's fastest scaler.",url:"https://fourierintelligence.com",il_covered:false},
   // INDUSTRIAL ROBOT
-  {name:"Intuitive Surgical",type:"Industrial Robot",hq:"Sunnyvale, CA",lat:37.3688,lng:-122.0363,status:"Public",ticker:"ISRG",funding:"Public",valuation:"~$190B",thesis:"The template for robotics monetization at scale. 10,763 systems globally.",url:"https://intuitivesurgical.com",il_covered:true},
-  {name:"Symbotic",type:"Industrial Robot",hq:"Wilmington, MA",lat:42.5584,lng:-71.1648,status:"Public",ticker:"SYM",funding:"Public",valuation:"~$8B",thesis:"Warehouse-as-a-Service pioneer. $22.5B backlog. The AWS model for logistics.",url:"https://symbotic.com",il_covered:true},
-  {name:"ABB Robotics",type:"Industrial Robot",hq:"Zurich, Switzerland",lat:47.3769,lng:8.5417,status:"Public",ticker:"ABB",funding:"Public",valuation:"~$90B",thesis:"Industrial robotics incumbent. NVIDIA partnership signals the software era is coming.",url:"https://abb.com",il_covered:true},
-  {name:"FANUC",type:"Industrial Robot",hq:"Oshino, Japan",lat:35.4781,lng:138.765,status:"Public",ticker:"6954.T",funding:"Public",valuation:"~$25B",thesis:"2M+ robots installed globally. Integrating Nvidia Isaac for AI-driven factory automation.",url:"https://fanuc.com",il_covered:false},
-  {name:"Yaskawa Electric",type:"Industrial Robot",hq:"Kitakyushu, Japan",lat:33.8834,lng:130.8751,status:"Public",ticker:"6506.T",funding:"Public",valuation:"~$8B",thesis:"Industrial robot incumbent. Part of Nvidia's global physical AI ecosystem.",url:"https://yaskawa.co.jp",il_covered:false},
-  {name:"KUKA",type:"Industrial Robot",hq:"Augsburg, Germany",lat:48.3705,lng:10.8978,status:"Public",ticker:"KU2.DE",funding:"Midea-owned",valuation:"~$3B",thesis:"European industrial robot giant. Chinese-owned. Integrating Nvidia Omniverse.",url:"https://kuka.com",il_covered:false},
-  {name:"Mind Robotics",type:"Industrial Robot",hq:"Normal, IL",lat:40.5142,lng:-88.9906,status:"Private",funding:"$615M",valuation:"~$2B",thesis:"Rivian spinout. Industrial robots trained on EV factory data. $500M Series A.",url:"https://mindrobotics.com",il_covered:true},
-  {name:"SoftBank / Exol",type:"Industrial Robot",hq:"Tokyo, Japan",lat:35.6762,lng:139.6503,status:"Private",funding:"SoftBank-owned",valuation:"Undisclosed",thesis:"65% owner of Exol (GreenBox) WaaS JV with Symbotic. $7.5B system contract.",url:"https://softbankrobotics.com",il_covered:true},
-  {name:"Universal Robots",type:"Industrial Robot",hq:"Odense, Denmark",lat:55.3959,lng:10.3883,status:"Private",funding:"Teradyne-owned",valuation:"Undisclosed",thesis:"Collaborative robot leader. 75,000+ cobots deployed globally. Integrating Skild AI.",url:"https://universal-robots.com",il_covered:false},
-  {name:"Comau",type:"Industrial Robot",hq:"Turin, Italy",lat:45.0703,lng:7.6869,status:"Private",funding:"Stellantis-owned",valuation:"Undisclosed",thesis:"European industrial automation. Partnered with Reis Robotics for shipbuilding and battery production.",url:"https://comau.com",il_covered:false},
-  {name:"Stäubli Robotics",type:"Industrial Robot",hq:"Pfäffikon, Switzerland",lat:47.2000,lng:8.7800,status:"Private",funding:"Private",valuation:"Undisclosed",thesis:"Precision robotics for pharma, textiles, and automotive. Clean-room specialist.",url:"https://staubli.com",il_covered:false},
-  {name:"Doosan Robotics",type:"Industrial Robot",hq:"Seoul, South Korea",lat:37.5665,lng:126.9780,status:"Public",ticker:"454910.KQ",funding:"Public",valuation:"~$1B",thesis:"South Korean cobot leader. Expanding into food service and healthcare automation.",url:"https://doosanrobotics.com",il_covered:false},
-  {name:"Brightpick",type:"Industrial Robot",hq:"New York, NY",lat:40.7580,lng:-73.9855,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"AI warehouse robots. The Feed running fully autonomous lights-out night shifts now.",url:"https://brightpick.ai",il_covered:true},
-  {name:"Hexagon Robotics",type:"Industrial Robot",hq:"Stockholm, Sweden",lat:59.3293,lng:18.0686,status:"Public",ticker:"HEXA-B.ST",funding:"Public",valuation:"~$20B",thesis:"Metrology and robotics. BMW Leipzig deployment. Integrating Nvidia Isaac Sim.",url:"https://hexagon.com",il_covered:false},
+  {name:"Intuitive Surgical",year:1995,type:"Industrial Robot",hq:"Sunnyvale, CA",lat:37.3688,lng:-122.0363,status:"Public",ticker:"ISRG",funding:"Public",valuation:"~$190B",thesis:"The template for robotics monetization at scale. 10,763 systems globally.",url:"https://intuitivesurgical.com",il_covered:true},
+  {name:"Symbotic",year:2007,type:"Industrial Robot",hq:"Wilmington, MA",lat:42.5584,lng:-71.1648,status:"Public",ticker:"SYM",funding:"Public",valuation:"~$8B",thesis:"Warehouse-as-a-Service pioneer. $22.5B backlog. The AWS model for logistics.",url:"https://symbotic.com",il_covered:true},
+  {name:"ABB Robotics",year:1988,type:"Industrial Robot",hq:"Zurich, Switzerland",lat:47.3769,lng:8.5417,status:"Public",ticker:"ABB",funding:"Public",valuation:"~$90B",thesis:"Industrial robotics incumbent. NVIDIA partnership signals the software era is coming.",url:"https://abb.com",il_covered:true},
+  {name:"FANUC",year:1956,type:"Industrial Robot",hq:"Oshino, Japan",lat:35.4781,lng:138.765,status:"Public",ticker:"6954.T",funding:"Public",valuation:"~$25B",thesis:"2M+ robots installed globally. Integrating Nvidia Isaac for AI-driven factory automation.",url:"https://fanuc.com",il_covered:false},
+  {name:"Yaskawa Electric",year:1915,type:"Industrial Robot",hq:"Kitakyushu, Japan",lat:33.8834,lng:130.8751,status:"Public",ticker:"6506.T",funding:"Public",valuation:"~$8B",thesis:"Industrial robot incumbent. Part of Nvidia's global physical AI ecosystem.",url:"https://yaskawa.co.jp",il_covered:false},
+  {name:"KUKA",year:1898,type:"Industrial Robot",hq:"Augsburg, Germany",lat:48.3705,lng:10.8978,status:"Public",ticker:"KU2.DE",funding:"Midea-owned",valuation:"~$3B",thesis:"European industrial robot giant. Chinese-owned. Integrating Nvidia Omniverse.",url:"https://kuka.com",il_covered:false},
+  {name:"Mind Robotics",year:2023,type:"Industrial Robot",hq:"Normal, IL",lat:40.5142,lng:-88.9906,status:"Private",funding:"$615M",valuation:"~$2B",thesis:"Rivian spinout. Industrial robots trained on EV factory data. $500M Series A.",url:"https://mindrobotics.com",il_covered:true},
+  {name:"SoftBank / Exol",year:2023,type:"Industrial Robot",hq:"Tokyo, Japan",lat:35.6762,lng:139.6503,status:"Private",funding:"SoftBank-owned",valuation:"Undisclosed",thesis:"65% owner of Exol (GreenBox) WaaS JV with Symbotic. $7.5B system contract.",url:"https://softbankrobotics.com",il_covered:true},
+  {name:"Universal Robots",year:2005,type:"Industrial Robot",hq:"Odense, Denmark",lat:55.3959,lng:10.3883,status:"Private",funding:"Teradyne-owned",valuation:"Undisclosed",thesis:"Collaborative robot leader. 75,000+ cobots deployed globally. Integrating Skild AI.",url:"https://universal-robots.com",il_covered:false},
+  {name:"Comau",year:1973,type:"Industrial Robot",hq:"Turin, Italy",lat:45.0703,lng:7.6869,status:"Private",funding:"Stellantis-owned",valuation:"Undisclosed",thesis:"European industrial automation. Partnered with Reis Robotics for shipbuilding and battery production.",url:"https://comau.com",il_covered:false},
+  {name:"Stäubli Robotics",year:1892,type:"Industrial Robot",hq:"Pfäffikon, Switzerland",lat:47.2000,lng:8.7800,status:"Private",funding:"Private",valuation:"Undisclosed",thesis:"Precision robotics for pharma, textiles, and automotive. Clean-room specialist.",url:"https://staubli.com",il_covered:false},
+  {name:"Doosan Robotics",year:2015,type:"Industrial Robot",hq:"Seoul, South Korea",lat:37.5665,lng:126.9780,status:"Public",ticker:"454910.KQ",funding:"Public",valuation:"~$1B",thesis:"South Korean cobot leader. Expanding into food service and healthcare automation.",url:"https://doosanrobotics.com",il_covered:false},
+  {name:"Brightpick",year:2020,type:"Industrial Robot",hq:"New York, NY",lat:40.7580,lng:-73.9855,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"AI warehouse robots. The Feed running fully autonomous lights-out night shifts now.",url:"https://brightpick.ai",il_covered:true},
+  {name:"Hexagon Robotics",year:1992,type:"Industrial Robot",hq:"Stockholm, Sweden",lat:59.3293,lng:18.0686,status:"Public",ticker:"HEXA-B.ST",funding:"Public",valuation:"~$20B",thesis:"Metrology and robotics. BMW Leipzig deployment. Integrating Nvidia Isaac Sim.",url:"https://hexagon.com",il_covered:false},
   // AI / AGENTS
-  {name:"Physical Intelligence",type:"AI / Agents",hq:"San Francisco, CA",lat:37.7749,lng:-122.4194,status:"Private",funding:"$400M",valuation:"Undisclosed",thesis:"Building the foundation model for physical AI. The GPT moment for robot brains.",url:"https://physicalintelligence.company",il_covered:true},
-  {name:"Google DeepMind Robotics",type:"AI / Agents",hq:"London, UK",lat:51.5074,lng:-0.1278,status:"Public",funding:"Alphabet-owned",valuation:"Alphabet",thesis:"Gemini Robotics now deployed in Agile Robots' 20,000 global systems. Platform play.",url:"https://deepmind.google",il_covered:false},
-  {name:"Skild AI",type:"AI / Agents",hq:"Pittsburgh, PA",lat:40.4406,lng:-79.9959,status:"Private",funding:"$300M",valuation:"Undisclosed",thesis:"Generalized robot intelligence platform. Partnered with ABB, Universal Robots, Foxconn.",url:"https://skild.ai",il_covered:false},
-  {name:"Covariant",type:"AI / Agents",hq:"Emeryville, CA",lat:37.8316,lng:-122.2900,status:"Private",funding:"$222M",valuation:"Undisclosed",thesis:"RFM-1 robot foundation model. AI brain for warehouse picking and manipulation.",url:"https://covariant.ai",il_covered:false},
-  {name:"Rhoda AI",type:"AI / Agents",hq:"San Francisco, CA",lat:37.7800,lng:-122.4100,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"FutureVision video-predictive control for industrial robots. Series A March 2026.",url:"https://rhoda.ai",il_covered:false},
-  {name:"Microsoft Robotics",type:"AI / Agents",hq:"Redmond, WA",lat:47.6423,lng:-122.1301,status:"Public",ticker:"MSFT",funding:"Public",valuation:"~$3T",thesis:"Rho-alpha VLA model. Azure Robotics Accelerator. Positioning against Nvidia's Isaac.",url:"https://microsoft.com",il_covered:false},
+  {name:"Physical Intelligence",year:2023,type:"AI / Agents",hq:"San Francisco, CA",lat:37.7749,lng:-122.4194,status:"Private",funding:"$400M",valuation:"Undisclosed",thesis:"Building the foundation model for physical AI. The GPT moment for robot brains.",url:"https://physicalintelligence.company",il_covered:true},
+  {name:"Google DeepMind Robotics",year:2010,type:"AI / Agents",hq:"London, UK",lat:51.5074,lng:-0.1278,status:"Public",funding:"Alphabet-owned",valuation:"Alphabet",thesis:"Gemini Robotics now deployed in Agile Robots' 20,000 global systems. Platform play.",url:"https://deepmind.google",il_covered:false},
+  {name:"Skild AI",year:2023,type:"AI / Agents",hq:"Pittsburgh, PA",lat:40.4406,lng:-79.9959,status:"Private",funding:"$300M",valuation:"Undisclosed",thesis:"Generalized robot intelligence platform. Partnered with ABB, Universal Robots, Foxconn.",url:"https://skild.ai",il_covered:false},
+  {name:"Covariant",year:2017,type:"AI / Agents",hq:"Emeryville, CA",lat:37.8316,lng:-122.2900,status:"Private",funding:"$222M",valuation:"Undisclosed",thesis:"RFM-1 robot foundation model. AI brain for warehouse picking and manipulation.",url:"https://covariant.ai",il_covered:false},
+  {name:"Rhoda AI",year:2024,type:"AI / Agents",hq:"San Francisco, CA",lat:37.7800,lng:-122.4100,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"FutureVision video-predictive control for industrial robots. Series A March 2026.",url:"https://rhoda.ai",il_covered:false},
+  {name:"Microsoft Robotics",year:2023,type:"AI / Agents",hq:"Redmond, WA",lat:47.6423,lng:-122.1301,status:"Public",ticker:"MSFT",funding:"Public",valuation:"~$3T",thesis:"Rho-alpha VLA model. Azure Robotics Accelerator. Positioning against Nvidia's Isaac.",url:"https://microsoft.com",il_covered:false},
   // PICKS & SHOVELS
-  {name:"Nvidia",type:"Picks & Shovels",hq:"Santa Clara, CA",lat:37.3688,lng:-121.9641,status:"Public",ticker:"NVDA",funding:"Public",valuation:"~$2.9T",thesis:"The compute substrate for all physical AI. Wins regardless of who wins the hardware war.",url:"https://nvidia.com",il_covered:true},
-  {name:"TSMC",type:"Picks & Shovels",hq:"Hsinchu, Taiwan",lat:24.8138,lng:120.9675,status:"Public",ticker:"TSM",funding:"Public",valuation:"~$900B",thesis:"The most critical chokepoint in all of physical AI. Every robot chip runs through here.",url:"https://tsmc.com",il_covered:false},
-  {name:"Mobileye",type:"Picks & Shovels",hq:"Jerusalem, Israel",lat:31.7683,lng:35.2137,status:"Public",ticker:"MBLY",funding:"Public",valuation:"~$12B",thesis:"Autonomous vehicle vision chips. Expanding into robotics perception.",url:"https://mobileye.com",il_covered:false},
-  {name:"Cadence Design Systems",type:"Picks & Shovels",hq:"San Jose, CA",lat:37.3861,lng:-121.9784,status:"Public",ticker:"CDNS",funding:"Public",valuation:"~$65B",thesis:"$3.18B Hexagon acquisition closing 2026. Critical robotics simulation and EDA tooling.",url:"https://cadence.com",il_covered:false},
+  {name:"Nvidia",year:1993,type:"Picks & Shovels",hq:"Santa Clara, CA",lat:37.3688,lng:-121.9641,status:"Public",ticker:"NVDA",funding:"Public",valuation:"~$2.9T",thesis:"The compute substrate for all physical AI. Wins regardless of who wins the hardware war.",url:"https://nvidia.com",il_covered:true},
+  {name:"TSMC",year:1987,type:"Picks & Shovels",hq:"Hsinchu, Taiwan",lat:24.8138,lng:120.9675,status:"Public",ticker:"TSM",funding:"Public",valuation:"~$900B",thesis:"The most critical chokepoint in all of physical AI. Every robot chip runs through here.",url:"https://tsmc.com",il_covered:false},
+  {name:"Mobileye",year:1999,type:"Picks & Shovels",hq:"Jerusalem, Israel",lat:31.7683,lng:35.2137,status:"Public",ticker:"MBLY",funding:"Public",valuation:"~$12B",thesis:"Autonomous vehicle vision chips. Expanding into robotics perception.",url:"https://mobileye.com",il_covered:false},
+  {name:"Cadence Design Systems",year:1988,type:"Picks & Shovels",hq:"San Jose, CA",lat:37.3861,lng:-121.9784,status:"Public",ticker:"CDNS",funding:"Public",valuation:"~$65B",thesis:"$3.18B Hexagon acquisition closing 2026. Critical robotics simulation and EDA tooling.",url:"https://cadence.com",il_covered:false},
   // SOFTWARE AUTOMATION
-  {name:"UiPath",type:"Software Automation",hq:"New York, NY",lat:40.7128,lng:-74.006,status:"Public",ticker:"PATH",funding:"Public",valuation:"~$7B",thesis:"RPA incumbent being commoditized by AI agents. Existential threat from LLMs.",url:"https://uipath.com",il_covered:true},
-  {name:"Automation Anywhere",type:"Software Automation",hq:"San Jose, CA",lat:37.3382,lng:-121.8863,status:"Private",funding:"$840M",valuation:"~$6.8B",thesis:"Enterprise RPA competing with AI agents. Pivoting toward agentic automation.",url:"https://automationanywhere.com",il_covered:false},
-  {name:"ServiceNow",type:"Software Automation",hq:"Santa Clara, CA",lat:37.3540,lng:-121.9552,status:"Public",ticker:"NOW",funding:"Public",valuation:"~$140B",thesis:"AI agents embedded in enterprise workflows. Anticipates AI bots causing fundamental shift in work.",url:"https://servicenow.com",il_covered:false},
-  {name:"Vention",type:"Software Automation",hq:"Montreal, Canada",lat:45.5017,lng:-73.5673,status:"Private",funding:"$95M",valuation:"Undisclosed",thesis:"No-code industrial automation platform. Nvidia Omniverse partner for digital twin manufacturing.",url:"https://vention.io",il_covered:false},
+  {name:"UiPath",year:2005,type:"Software Automation",hq:"New York, NY",lat:40.7128,lng:-74.006,status:"Public",ticker:"PATH",funding:"Public",valuation:"~$7B",thesis:"RPA incumbent being commoditized by AI agents. Existential threat from LLMs.",url:"https://uipath.com",il_covered:true},
+  {name:"Automation Anywhere",year:2003,type:"Software Automation",hq:"San Jose, CA",lat:37.3382,lng:-121.8863,status:"Private",funding:"$840M",valuation:"~$6.8B",thesis:"Enterprise RPA competing with AI agents. Pivoting toward agentic automation.",url:"https://automationanywhere.com",il_covered:false},
+  {name:"ServiceNow",year:2004,type:"Software Automation",hq:"Santa Clara, CA",lat:37.3540,lng:-121.9552,status:"Public",ticker:"NOW",funding:"Public",valuation:"~$140B",thesis:"AI agents embedded in enterprise workflows. Anticipates AI bots causing fundamental shift in work.",url:"https://servicenow.com",il_covered:false},
+  {name:"Vention",year:2017,type:"Software Automation",hq:"Montreal, Canada",lat:45.5017,lng:-73.5673,status:"Private",funding:"$95M",valuation:"Undisclosed",thesis:"No-code industrial automation platform. Nvidia Omniverse partner for digital twin manufacturing.",url:"https://vention.io",il_covered:false},
   // WAREHOUSE / LOGISTICS
-  {name:"Geek+",type:"Industrial Robot",hq:"Beijing, China",lat:39.9042,lng:116.4074,status:"Private",funding:"$700M",valuation:"~$2B",thesis:"China's largest warehouse robot company. AMRs deployed in 1,000+ warehouses globally.",url:"https://geekplus.com",il_covered:false},
-  {name:"Hai Robotics",type:"Industrial Robot",hq:"Shenzhen, China",lat:22.5431,lng:114.0579,status:"Private",funding:"$200M+",valuation:"Undisclosed",thesis:"HAIPICK AS/RS robots. Vertical storage automation. Expanding aggressively into Europe and US.",url:"https://hairobotics.com",il_covered:false},
-  {name:"AutoStore",type:"Industrial Robot",hq:"Nedre Vats, Norway",lat:59.5833,lng:5.8333,status:"Public",ticker:"AUTO.OL",funding:"Public",valuation:"~$3B",thesis:"Cube-based robotic storage. 1,100+ systems deployed globally. Swisslog partnership.",url:"https://autostoresystem.com",il_covered:false},
-  {name:"GreyOrange",type:"Industrial Robot",hq:"Atlanta, GA",lat:33.7490,lng:-84.3880,status:"Private",funding:"$170M",valuation:"~$1B",thesis:"AI-powered fulfillment robots. Ranger AMR platform. Strong in apparel and retail logistics.",url:"https://greyorange.com",il_covered:false},
-  {name:"Locus Robotics",type:"Industrial Robot",hq:"Wilmington, MA",lat:42.5584,lng:-71.1700,status:"Private",funding:"$400M",valuation:"Undisclosed",thesis:"Warehouse AMR pioneer. LocusBot fleet deployed at DHL, GEODIS, and Boots UK.",url:"https://locusrobotics.com",il_covered:false},
-  {name:"Vanderlande",type:"Industrial Robot",hq:"Veghel, Netherlands",lat:51.6167,lng:5.5500,status:"Private",funding:"Toyota-owned",valuation:"Undisclosed",thesis:"Baggage and parcel logistics automation. Deployed in 600+ airports globally.",url:"https://vanderlande.com",il_covered:false},
-  {name:"Vecna Robotics",type:"Industrial Robot",hq:"Waltham, MA",lat:42.3765,lng:-71.2356,status:"Private",funding:"$100M+",valuation:"Undisclosed",thesis:"Pallet-moving AMRs for heavy industrial logistics. Targeting manufacturing and 3PL.",url:"https://vecnarobotics.com",il_covered:false},
+  {name:"Geek+",year:2015,type:"Industrial Robot",hq:"Beijing, China",lat:39.9042,lng:116.4074,status:"Private",funding:"$700M",valuation:"~$2B",thesis:"China's largest warehouse robot company. AMRs deployed in 1,000+ warehouses globally.",url:"https://geekplus.com",il_covered:false},
+  {name:"Hai Robotics",year:2016,type:"Industrial Robot",hq:"Shenzhen, China",lat:22.5431,lng:114.0579,status:"Private",funding:"$200M+",valuation:"Undisclosed",thesis:"HAIPICK AS/RS robots. Vertical storage automation. Expanding aggressively into Europe and US.",url:"https://hairobotics.com",il_covered:false},
+  {name:"AutoStore",year:1996,type:"Industrial Robot",hq:"Nedre Vats, Norway",lat:59.5833,lng:5.8333,status:"Public",ticker:"AUTO.OL",funding:"Public",valuation:"~$3B",thesis:"Cube-based robotic storage. 1,100+ systems deployed globally. Swisslog partnership.",url:"https://autostoresystem.com",il_covered:false},
+  {name:"GreyOrange",year:2012,type:"Industrial Robot",hq:"Atlanta, GA",lat:33.7490,lng:-84.3880,status:"Private",funding:"$170M",valuation:"~$1B",thesis:"AI-powered fulfillment robots. Ranger AMR platform. Strong in apparel and retail logistics.",url:"https://greyorange.com",il_covered:false},
+  {name:"Locus Robotics",year:2014,type:"Industrial Robot",hq:"Wilmington, MA",lat:42.5584,lng:-71.1700,status:"Private",funding:"$400M",valuation:"Undisclosed",thesis:"Warehouse AMR pioneer. LocusBot fleet deployed at DHL, GEODIS, and Boots UK.",url:"https://locusrobotics.com",il_covered:false},
+  {name:"Vanderlande",year:1949,type:"Industrial Robot",hq:"Veghel, Netherlands",lat:51.6167,lng:5.5500,status:"Private",funding:"Toyota-owned",valuation:"Undisclosed",thesis:"Baggage and parcel logistics automation. Deployed in 600+ airports globally.",url:"https://vanderlande.com",il_covered:false},
+  {name:"Vecna Robotics",year:1998,type:"Industrial Robot",hq:"Waltham, MA",lat:42.3765,lng:-71.2356,status:"Private",funding:"$100M+",valuation:"Undisclosed",thesis:"Pallet-moving AMRs for heavy industrial logistics. Targeting manufacturing and 3PL.",url:"https://vecnarobotics.com",il_covered:false},
   // SURGICAL / MEDICAL
-  {name:"CMR Surgical",type:"Industrial Robot",hq:"Cambridge, UK",lat:52.2053,lng:0.1218,status:"Private",funding:"$600M",valuation:"~$3B",thesis:"Versius surgical robot system. Competing directly with Intuitive Surgical in Europe and Asia.",url:"https://cmrsurgical.com",il_covered:false},
-  {name:"Medtronic Hugo",type:"Industrial Robot",hq:"Dublin, Ireland",lat:53.3498,lng:-6.2603,status:"Public",ticker:"MDT",funding:"Public",valuation:"~$50B",thesis:"Hugo RAS surgical system targeting Intuitive Surgical market share. Global rollout underway.",url:"https://medtronic.com",il_covered:false},
-  {name:"Stryker",type:"Industrial Robot",hq:"Kalamazoo, MI",lat:42.2917,lng:-85.5872,status:"Public",ticker:"SYK",funding:"Public",valuation:"~$130B",thesis:"MAKO robotic arm for orthopedic surgery. 2,000+ systems installed. Fastest-growing surgical robot segment.",url:"https://stryker.com",il_covered:false},
-  {name:"Diligent Robotics",type:"Humanoid",hq:"Austin, TX",lat:30.2500,lng:-97.7500,status:"Private",funding:"$30M",valuation:"Undisclosed",thesis:"Moxi hospital robot. Handles logistics tasks in 100+ hospitals. The quiet humanoid success story.",url:"https://diligentrobots.com",il_covered:false},
+  {name:"CMR Surgical",year:2014,type:"Industrial Robot",hq:"Cambridge, UK",lat:52.2053,lng:0.1218,status:"Private",funding:"$600M",valuation:"~$3B",thesis:"Versius surgical robot system. Competing directly with Intuitive Surgical in Europe and Asia.",url:"https://cmrsurgical.com",il_covered:false},
+  {name:"Medtronic Hugo",year:1949,type:"Industrial Robot",hq:"Dublin, Ireland",lat:53.3498,lng:-6.2603,status:"Public",ticker:"MDT",funding:"Public",valuation:"~$50B",thesis:"Hugo RAS surgical system targeting Intuitive Surgical market share. Global rollout underway.",url:"https://medtronic.com",il_covered:false},
+  {name:"Stryker",year:1941,type:"Industrial Robot",hq:"Kalamazoo, MI",lat:42.2917,lng:-85.5872,status:"Public",ticker:"SYK",funding:"Public",valuation:"~$130B",thesis:"MAKO robotic arm for orthopedic surgery. 2,000+ systems installed. Fastest-growing surgical robot segment.",url:"https://stryker.com",il_covered:false},
+  {name:"Diligent Robotics",year:2017,type:"Humanoid",hq:"Austin, TX",lat:30.2500,lng:-97.7500,status:"Private",funding:"$30M",valuation:"Undisclosed",thesis:"Moxi hospital robot. Handles logistics tasks in 100+ hospitals. The quiet humanoid success story.",url:"https://diligentrobots.com",il_covered:false},
   // DEFENSE / SECURITY
-  {name:"Anduril Industries",type:"Picks & Shovels",hq:"Costa Mesa, CA",lat:33.6411,lng:-117.9187,status:"Private",funding:"$2.5B",valuation:"~$28B",thesis:"Defense AI and autonomous systems. Lattice AI platform. Fastest-growing US defense tech company.",url:"https://anduril.com",il_covered:false},
-  {name:"Shield AI",type:"AI / Agents",hq:"San Diego, CA",lat:32.7157,lng:-117.1611,status:"Private",funding:"$500M",valuation:"~$2.7B",thesis:"Hivemind AI for autonomous military aircraft. No GPS, no comms, no operator required.",url:"https://shield.ai",il_covered:false},
-  {name:"Ghost Robotics",type:"Humanoid",hq:"Philadelphia, PA",lat:39.9526,lng:-75.1652,status:"Private",funding:"$120M",valuation:"Undisclosed",thesis:"Quadruped robots for military and industrial inspection. Vision 60 deployed by US Air Force.",url:"https://ghostrobotics.io",il_covered:false},
-  {name:"Sarcos Technology",type:"Picks & Shovels",hq:"Salt Lake City, UT",lat:40.7608,lng:-111.8910,status:"Public",ticker:"ROBO",funding:"Public",valuation:"Undisclosed",thesis:"Guardian XO exoskeleton for industrial workers. Reduces injury and augments human strength.",url:"https://sarcos.com",il_covered:false},
+  {name:"Anduril Industries",year:2017,type:"Picks & Shovels",hq:"Costa Mesa, CA",lat:33.6411,lng:-117.9187,status:"Private",funding:"$2.5B",valuation:"~$28B",thesis:"Defense AI and autonomous systems. Lattice AI platform. Fastest-growing US defense tech company.",url:"https://anduril.com",il_covered:false},
+  {name:"Shield AI",year:2015,type:"AI / Agents",hq:"San Diego, CA",lat:32.7157,lng:-117.1611,status:"Private",funding:"$500M",valuation:"~$2.7B",thesis:"Hivemind AI for autonomous military aircraft. No GPS, no comms, no operator required.",url:"https://shield.ai",il_covered:false},
+  {name:"Ghost Robotics",year:2015,type:"Humanoid",hq:"Philadelphia, PA",lat:39.9526,lng:-75.1652,status:"Private",funding:"$120M",valuation:"Undisclosed",thesis:"Quadruped robots for military and industrial inspection. Vision 60 deployed by US Air Force.",url:"https://ghostrobotics.io",il_covered:false},
+  {name:"Sarcos Technology",year:1983,type:"Picks & Shovels",hq:"Salt Lake City, UT",lat:40.7608,lng:-111.8910,status:"Public",ticker:"ROBO",funding:"Public",valuation:"Undisclosed",thesis:"Guardian XO exoskeleton for industrial workers. Reduces injury and augments human strength.",url:"https://sarcos.com",il_covered:false},
   // JAPANESE INDUSTRIALS
-  {name:"Kawasaki Robotics",type:"Industrial Robot",hq:"Akashi, Japan",lat:34.6500,lng:134.9833,status:"Public",ticker:"7012.T",funding:"Public",valuation:"~$15B",thesis:"Welding and assembly robots. duAro dual-arm cobot for human-collaborative manufacturing.",url:"https://kawasakirobotics.com",il_covered:false},
-  {name:"Denso Robotics",type:"Industrial Robot",hq:"Aichi, Japan",lat:34.7500,lng:137.0833,status:"Public",ticker:"6902.T",funding:"Public",valuation:"~$45B",thesis:"High-speed assembly robots for automotive and electronics. 130,000+ units shipped annually.",url:"https://densorobotics.com",il_covered:false},
-  {name:"Omron Robotics",type:"Industrial Robot",hq:"Kyoto, Japan",lat:35.0116,lng:135.7681,status:"Public",ticker:"6645.T",funding:"Public",valuation:"~$8B",thesis:"Collaborative robots and autonomous mobile platforms. Acquired Adept Technology for US expansion.",url:"https://omron.com",il_covered:false},
-  {name:"Epson Robots",type:"Industrial Robot",hq:"Suwa, Japan",lat:36.0333,lng:138.1167,status:"Public",ticker:"6724.T",funding:"Public",valuation:"~$6B",thesis:"SCARA and 6-axis robots for electronics assembly. Smallest and fastest robots in class.",url:"https://robots.epson.com",il_covered:false},
+  {name:"Kawasaki Robotics",year:1969,type:"Industrial Robot",hq:"Akashi, Japan",lat:34.6500,lng:134.9833,status:"Public",ticker:"7012.T",funding:"Public",valuation:"~$15B",thesis:"Welding and assembly robots. duAro dual-arm cobot for human-collaborative manufacturing.",url:"https://kawasakirobotics.com",il_covered:false},
+  {name:"Denso Robotics",year:1949,type:"Industrial Robot",hq:"Aichi, Japan",lat:34.7500,lng:137.0833,status:"Public",ticker:"6902.T",funding:"Public",valuation:"~$45B",thesis:"High-speed assembly robots for automotive and electronics. 130,000+ units shipped annually.",url:"https://densorobotics.com",il_covered:false},
+  {name:"Omron Robotics",year:1933,type:"Industrial Robot",hq:"Kyoto, Japan",lat:35.0116,lng:135.7681,status:"Public",ticker:"6645.T",funding:"Public",valuation:"~$8B",thesis:"Collaborative robots and autonomous mobile platforms. Acquired Adept Technology for US expansion.",url:"https://omron.com",il_covered:false},
+  {name:"Epson Robots",year:1975,type:"Industrial Robot",hq:"Suwa, Japan",lat:36.0333,lng:138.1167,status:"Public",ticker:"6724.T",funding:"Public",valuation:"~$6B",thesis:"SCARA and 6-axis robots for electronics assembly. Smallest and fastest robots in class.",url:"https://robots.epson.com",il_covered:false},
   // CHINESE HUMANOIDS
-  {name:"Kepler",type:"Humanoid",hq:"Shanghai, China",lat:31.3000,lng:121.5000,status:"Private",funding:"$100M+",valuation:"Undisclosed",thesis:"Forerunner humanoid robot targeting automotive and electronics manufacturing in China.",url:"https://kepler.com",il_covered:false},
-  {name:"Galbot",type:"Humanoid",hq:"Beijing, China",lat:39.9500,lng:116.4000,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"Wheeled humanoid robot for logistics and service. G1 competing with Unitree in domestic China market.",url:"https://galbot.com",il_covered:false},
-  {name:"Fourier Intelligence",type:"Humanoid",hq:"Shanghai, China",lat:31.1500,lng:121.4000,status:"Private",funding:"$200M+",valuation:"Undisclosed",thesis:"GR-1 humanoid targeting rehabilitation and industrial use. China fastest scaler outside Unitree.",url:"https://fourierintelligence.com",il_covered:false},
+  {name:"Kepler",year:2022,type:"Humanoid",hq:"Shanghai, China",lat:31.3000,lng:121.5000,status:"Private",funding:"$100M+",valuation:"Undisclosed",thesis:"Forerunner humanoid robot targeting automotive and electronics manufacturing in China.",url:"https://kepler.com",il_covered:false},
+  {name:"Galbot",year:2023,type:"Humanoid",hq:"Beijing, China",lat:39.9500,lng:116.4000,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"Wheeled humanoid robot for logistics and service. G1 competing with Unitree in domestic China market.",url:"https://galbot.com",il_covered:false},
+  {name:"Fourier Intelligence",year:2015,type:"Humanoid",hq:"Shanghai, China",lat:31.1500,lng:121.4000,status:"Private",funding:"$200M+",valuation:"Undisclosed",thesis:"GR-1 humanoid targeting rehabilitation and industrial use. China fastest scaler outside Unitree.",url:"https://fourierintelligence.com",il_covered:false},
   // EUROPEAN PLAYERS
-  {name:"Franka Robotics",type:"Industrial Robot",hq:"Munich, Germany",lat:48.1351,lng:11.5820,status:"Private",funding:"$100M+",valuation:"Undisclosed",thesis:"Panda cobot pioneer. Research-grade precision robots. Nvidia Isaac GR00T early adopter.",url:"https://franka.de",il_covered:false},
-  {name:"igus",type:"Picks & Shovels",hq:"Cologne, Germany",lat:50.9333,lng:6.9500,status:"Private",funding:"Private",valuation:"~$1B",thesis:"Low-cost robot arms starting at $4,990. Democratizing automation for SMEs. ReBeL cobot.",url:"https://igus.com",il_covered:false},
-  {name:"Kassow Robots",type:"Industrial Robot",hq:"Copenhagen, Denmark",lat:55.6761,lng:12.5683,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"7-axis collaborative robots. High-payload cobots for welding and assembly.",url:"https://kassowrobots.com",il_covered:false},
-  {name:"Wandelbots",type:"AI / Agents",hq:"Dresden, Germany",lat:51.0504,lng:13.7373,status:"Private",funding:"$100M",valuation:"Undisclosed",thesis:"No-code robot programming platform. Teach robots by demonstration — no programming required.",url:"https://wandelbots.com",il_covered:false},
-  {name:"Automata Technologies",type:"Industrial Robot",hq:"London, UK",lat:51.5200,lng:-0.1000,status:"Private",funding:"$50M",valuation:"Undisclosed",thesis:"EVA cobot for lab automation. Democratizing robotics for biotech and pharmaceutical labs.",url:"https://automata.tech",il_covered:false},
+  {name:"Franka Robotics",year:2016,type:"Industrial Robot",hq:"Munich, Germany",lat:48.1351,lng:11.5820,status:"Private",funding:"$100M+",valuation:"Undisclosed",thesis:"Panda cobot pioneer. Research-grade precision robots. Nvidia Isaac GR00T early adopter.",url:"https://franka.de",il_covered:false},
+  {name:"igus",year:1964,type:"Picks & Shovels",hq:"Cologne, Germany",lat:50.9333,lng:6.9500,status:"Private",funding:"Private",valuation:"~$1B",thesis:"Low-cost robot arms starting at $4,990. Democratizing automation for SMEs. ReBeL cobot.",url:"https://igus.com",il_covered:false},
+  {name:"Kassow Robots",year:2016,type:"Industrial Robot",hq:"Copenhagen, Denmark",lat:55.6761,lng:12.5683,status:"Private",funding:"Undisclosed",valuation:"Undisclosed",thesis:"7-axis collaborative robots. High-payload cobots for welding and assembly.",url:"https://kassowrobots.com",il_covered:false},
+  {name:"Wandelbots",year:2017,type:"AI / Agents",hq:"Dresden, Germany",lat:51.0504,lng:13.7373,status:"Private",funding:"$100M",valuation:"Undisclosed",thesis:"No-code robot programming platform. Teach robots by demonstration — no programming required.",url:"https://wandelbots.com",il_covered:false},
+  {name:"Automata Technologies",year:2015,type:"Industrial Robot",hq:"London, UK",lat:51.5200,lng:-0.1000,status:"Private",funding:"$50M",valuation:"Undisclosed",thesis:"EVA cobot for lab automation. Democratizing robotics for biotech and pharmaceutical labs.",url:"https://automata.tech",il_covered:false},
   // ISRAEL / MIDDLE EAST
-  {name:"Mentee Robotics",type:"Humanoid",hq:"Petah Tikva, Israel",lat:32.0840,lng:34.8878,status:"Private",funding:"$17M",valuation:"Undisclosed",thesis:"Humanoid robot from former Deep Instinct AI team. Training in simulation first approach.",url:"https://menteerobotics.com",il_covered:false},
+  {name:"Mentee Robotics",year:2022,type:"Humanoid",hq:"Petah Tikva, Israel",lat:32.0840,lng:34.8878,status:"Private",funding:"$17M",valuation:"Undisclosed",thesis:"Humanoid robot from former Deep Instinct AI team. Training in simulation first approach.",url:"https://menteerobotics.com",il_covered:false},
   // CANADA
-  {name:"Kinova",type:"Industrial Robot",hq:"Boisbriand, Canada",lat:45.6167,lng:-73.8333,status:"Private",funding:"$50M+",valuation:"Undisclosed",thesis:"Assistive and research robot arms. Gen3 Ultra deployed in hospitals and research labs globally.",url:"https://kinovarobotics.com",il_covered:false},
+  {name:"Kinova",year:2006,type:"Industrial Robot",hq:"Boisbriand, Canada",lat:45.6167,lng:-73.8333,status:"Private",funding:"$50M+",valuation:"Undisclosed",thesis:"Assistive and research robot arms. Gen3 Ultra deployed in hospitals and research labs globally.",url:"https://kinovarobotics.com",il_covered:false},
   // TAIWAN
-  {name:"Techman Robot",type:"Industrial Robot",hq:"Taoyuan, Taiwan",lat:24.9936,lng:121.3010,status:"Public",ticker:"6278.TW",funding:"Public",valuation:"~$1B",thesis:"Collaborative robots with built-in vision. Quanta Computer spinout. Nvidia Isaac GR00T partner.",url:"https://tm-robot.com",il_covered:false},
+  {name:"Techman Robot",year:2016,type:"Industrial Robot",hq:"Taoyuan, Taiwan",lat:24.9936,lng:121.3010,status:"Public",ticker:"6278.TW",funding:"Public",valuation:"~$1B",thesis:"Collaborative robots with built-in vision. Quanta Computer spinout. Nvidia Isaac GR00T partner.",url:"https://tm-robot.com",il_covered:false},
   // AI / SOFTWARE
-  {name:"Intrinsic",type:"AI / Agents",hq:"Mountain View, CA",lat:37.3861,lng:-122.0839,status:"Private",funding:"Alphabet-owned",valuation:"Alphabet",thesis:"Google Alphabet robotics software spinout. Flowstate no-code robot programming. The Android of industrial robots.",url:"https://intrinsic.ai",il_covered:false},
-  {name:"Realtime Robotics",type:"AI / Agents",hq:"Boston, MA",lat:42.3601,lng:-71.0589,status:"Private",funding:"$56M",valuation:"Undisclosed",thesis:"Instant motion planning for industrial robots. Reduces programming time from weeks to hours.",url:"https://rtr.ai",il_covered:false},
-  {name:"Covariant",type:"AI / Agents",hq:"Emeryville, CA",lat:37.8316,lng:-122.2900,status:"Private",funding:"$222M",valuation:"Undisclosed",thesis:"RFM-1 robot foundation model. AI brain for warehouse picking. Spin from Berkeley AI Research.",url:"https://covariant.ai",il_covered:false},
-  {name:"Brain Corp",type:"AI / Agents",hq:"San Diego, CA",lat:32.7157,lng:-117.1611,status:"Private",funding:"$200M+",valuation:"Undisclosed",thesis:"BrainOS autonomous navigation for floor-cleaning robots. 50,000+ robots deployed in retail.",url:"https://braincorp.com",il_covered:false},
+  {name:"Intrinsic",year:2021,type:"AI / Agents",hq:"Mountain View, CA",lat:37.3861,lng:-122.0839,status:"Private",funding:"Alphabet-owned",valuation:"Alphabet",thesis:"Google Alphabet robotics software spinout. Flowstate no-code robot programming. The Android of industrial robots.",url:"https://intrinsic.ai",il_covered:false},
+  {name:"Realtime Robotics",year:2017,type:"AI / Agents",hq:"Boston, MA",lat:42.3601,lng:-71.0589,status:"Private",funding:"$56M",valuation:"Undisclosed",thesis:"Instant motion planning for industrial robots. Reduces programming time from weeks to hours.",url:"https://rtr.ai",il_covered:false},
+  {name:"Covariant",year:2017,type:"AI / Agents",hq:"Emeryville, CA",lat:37.8316,lng:-122.2900,status:"Private",funding:"$222M",valuation:"Undisclosed",thesis:"RFM-1 robot foundation model. AI brain for warehouse picking. Spin from Berkeley AI Research.",url:"https://covariant.ai",il_covered:false},
+  {name:"Brain Corp",year:2009,type:"AI / Agents",hq:"San Diego, CA",lat:32.7157,lng:-117.1611,status:"Private",funding:"$200M+",valuation:"Undisclosed",thesis:"BrainOS autonomous navigation for floor-cleaning robots. 50,000+ robots deployed in retail.",url:"https://braincorp.com",il_covered:false},
   // DRONES / EVTOL
-  {name:"Joby Aviation",type:"Picks & Shovels",hq:"Santa Cruz, CA",lat:36.9741,lng:-122.0308,status:"Public",ticker:"JOBY",funding:"Public",valuation:"~$4B",thesis:"eVTOL air taxi. FAA certification expected 2025. Toyota and Delta investment. First robotaxi of the sky.",url:"https://jobyaviation.com",il_covered:false},
-  {name:"Archer Aviation",type:"Picks & Shovels",hq:"San Jose, CA",lat:37.3382,lng:-121.8760,status:"Public",ticker:"ACHR",funding:"Public",valuation:"~$1.5B",thesis:"Midnight eVTOL. UAE and United Airlines partnerships. Brett Adcock original company before Figure AI.",url:"https://flyarcher.com",il_covered:true},
+  {name:"Joby Aviation",year:2009,type:"Picks & Shovels",hq:"Santa Cruz, CA",lat:36.9741,lng:-122.0308,status:"Public",ticker:"JOBY",funding:"Public",valuation:"~$4B",thesis:"eVTOL air taxi. FAA certification expected 2025. Toyota and Delta investment. First robotaxi of the sky.",url:"https://jobyaviation.com",il_covered:false},
+  {name:"Archer Aviation",year:2018,type:"Picks & Shovels",hq:"San Jose, CA",lat:37.3382,lng:-121.8760,status:"Public",ticker:"ACHR",funding:"Public",valuation:"~$1.5B",thesis:"Midnight eVTOL. UAE and United Airlines partnerships. Brett Adcock original company before Figure AI.",url:"https://flyarcher.com",il_covered:true},
   // AUTONOMOUS VEHICLES
-  {name:"Zoox",type:"AI / Agents",hq:"Foster City, CA",lat:37.5585,lng:-122.2711,status:"Private",funding:"Amazon-owned",valuation:"Undisclosed",thesis:"Purpose-built robotaxi. Amazon-owned. Expanding to SF, Las Vegas, Austin, Miami in 2026.",url:"https://zoox.com",il_covered:false},
-  {name:"Waymo",type:"AI / Agents",hq:"Mountain View, CA",lat:37.4000,lng:-122.0500,status:"Private",funding:"Alphabet-owned",valuation:"~$45B",thesis:"Most mature robotaxi platform. 700,000+ paid trips. The benchmark every humanoid company wants to replicate.",url:"https://waymo.com",il_covered:false},
+  {name:"Zoox",year:2014,type:"AI / Agents",hq:"Foster City, CA",lat:37.5585,lng:-122.2711,status:"Private",funding:"Amazon-owned",valuation:"Undisclosed",thesis:"Purpose-built robotaxi. Amazon-owned. Expanding to SF, Las Vegas, Austin, Miami in 2026.",url:"https://zoox.com",il_covered:false},
+  {name:"Waymo",year:2009,type:"AI / Agents",hq:"Mountain View, CA",lat:37.4000,lng:-122.0500,status:"Private",funding:"Alphabet-owned",valuation:"~$45B",thesis:"Most mature robotaxi platform. 700,000+ paid trips. The benchmark every humanoid company wants to replicate.",url:"https://waymo.com",il_covered:false},
 ];
 
 const ROUTES=[
@@ -527,15 +575,13 @@ function closePanel(){
 
 function setFilter(type,btn){
   activeFilter=type;
+  watchlistOn=false;
+  document.getElementById('watchlist-btn').classList.remove('on');
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  const f=type==='all'?COMPANIES:COMPANIES.filter(c=>c.type===type);
-  globe.pointsData(f)
-    .pointLat('lat').pointLng('lng')
-    .pointColor(d=>TYPE_COLORS[d.type]||'#888')
-    .pointAltitude(0.02)
-    .pointRadius(d=>d.il_covered?0.5:0.3);
-  document.getElementById('stat-companies').textContent=f.length;
+  let f=type==='all'?COMPANIES:COMPANIES.filter(c=>c.type===type);
+  if(timelineOn) f=f.filter(c=>(c.year||2020)<=currentYear);
+  applyPoints(f);
 }
 
 function toggleSidebar(){
@@ -582,9 +628,174 @@ async function loadFeed(){
 
 
 
+// ── STOCK TICKER (Finnhub) ───────────────────────────────────────────────────
+// Get your FREE key at finnhub.io — takes 2 minutes, no credit card
+const FINNHUB_KEY = 'd7asjl1r01qtpbh9mfe0d7asjl1r01qtpbh9mfeg';
+
+const TICKERS = [
+  'NVDA','TSLA','ISRG','SYM','ABB','PATH','NOW','SYK','MDT','TSM','MBLY','CDNS','JOBY','ACHR'
+];
+
+async function fetchTicker(){
+  if(FINNHUB_KEY === 'YOUR_FINNHUB_KEY_HERE'){
+    showStaticTicker('Add Finnhub key for live prices');
+    return;
+  }
+  const results = [];
+  // Fetch sequentially to avoid rate limits (60/min free tier)
+  for(const sym of TICKERS){
+    try{
+      const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`);
+      const d = await r.json();
+      // Use current price, or fall back to previous close if market closed
+      const price = (d.c && d.c > 0) ? d.c : (d.pc || 0);
+      if(price > 0){
+        results.push({sym, price, chgPct:d.dp||0});
+      }
+    }catch(e){}
+    // Small delay to stay under rate limit
+    await new Promise(res=>setTimeout(res,100));
+  }
+  if(results.length) renderTicker(results);
+  else showStaticTicker('Market data unavailable');
+}
+
+function renderTicker(quotes){
+  const track = document.getElementById('ticker-track');
+  const loading = document.getElementById('ticker-loading');
+  let html = '';
+  // Double the items for seamless infinite scroll
+  for(let pass=0;pass<2;pass++){
+    quotes.forEach(q => {
+      const price = q.price.toFixed(2);
+      const chgPct = q.chgPct;
+      const arrow = chgPct >= 0 ? '▲' : '▼';
+      const cls = chgPct > 0.1 ? 'up' : chgPct < -0.1 ? 'down' : 'flat';
+      html += `<div class="ticker-item">
+        <span class="ticker-sym">${q.sym}</span>
+        <span class="ticker-price">$${price}</span>
+        <span class="ticker-chg ${cls}">${arrow}${Math.abs(chgPct).toFixed(2)}%</span>
+      </div><span class="ticker-dot">·</span>`;
+    });
+  }
+  track.innerHTML = html;
+  loading.style.display = 'none';
+  track.style.display = 'flex';
+}
+
+function showStaticTicker(msg){
+  const loading = document.getElementById('ticker-loading');
+  loading.textContent = msg || 'infinitelabor.substack.com';
+  loading.style.color = '#3a3630';
+}
+
+fetchTicker();
+setInterval(fetchTicker, 120000); // refresh every 2 min
+
+// ── CAPITAL COUNTER ──────────────────────────────────────────────────────────
+function calcCapital(companies){
+  let total = 0;
+  companies.forEach(c => {
+    const f = c.funding || '';
+    const m = f.match(/\$([0-9.]+)(B|M|T)?/i);
+    if(!m) return;
+    let n = parseFloat(m[1]);
+    const unit = (m[2]||'').toUpperCase();
+    if(unit==='T') n *= 1000;
+    else if(unit==='M') n /= 1000;
+    total += n;
+  });
+  return total;
+}
+
+function updateCapital(companies){
+  const total = calcCapital(companies);
+  const el = document.getElementById('capital-num');
+  if(total >= 1000) el.textContent = '$' + (total/1000).toFixed(1) + 'T';
+  else if(total > 0) el.textContent = '$' + total.toFixed(0) + 'B';
+  else el.textContent = '—';
+}
+
+// ── IL WATCHLIST TOGGLE ───────────────────────────────────────────────────────
+const IL_WATCHLIST = [
+  'Nvidia','Intuitive Surgical','Tesla / Optimus','Figure AI','Symbotic',
+  'ABB Robotics','Apptronik','Physical Intelligence','UiPath','Unitree Robotics'
+];
+
+let watchlistOn = false;
+function toggleWatchlist(btn){
+  watchlistOn = !watchlistOn;
+  btn.classList.toggle('on', watchlistOn);
+  if(watchlistOn){
+    const wl = COMPANIES.filter(c => IL_WATCHLIST.includes(c.name));
+    globe.pointsData(wl)
+      .pointLat('lat').pointLng('lng')
+      .pointColor(d=>TYPE_COLORS[d.type]||'#888')
+      .pointAltitude(0.025)
+      .pointRadius(0.65);
+    document.getElementById('stat-companies').textContent = wl.length;
+    updateCapital(wl);
+  } else {
+    const f = activeFilter==='all' ? COMPANIES : COMPANIES.filter(c=>c.type===activeFilter);
+    applyPoints(f);
+    updateCapital(f);
+  }
+}
+
+// ── TIMELINE SLIDER ───────────────────────────────────────────────────────────
+let timelineOn = false;
+let currentYear = 2026;
+
+function toggleTimeline(btn){
+  timelineOn = !timelineOn;
+  btn.classList.toggle('on', timelineOn);
+  document.getElementById('timeline').classList.toggle('hidden', !timelineOn);
+  if(!timelineOn){
+    document.getElementById('timeline-year').textContent = 'All';
+    currentYear = 2026;
+    document.getElementById('timeline-slider').value = 2026;
+    const f = activeFilter==='all' ? COMPANIES : COMPANIES.filter(c=>c.type===activeFilter);
+    applyPoints(f);
+    updateCapital(f);
+  }
+}
+
+function onTimelineSlide(val){
+  currentYear = parseInt(val);
+  document.getElementById('timeline-year').textContent = currentYear;
+  const base = activeFilter==='all' ? COMPANIES : COMPANIES.filter(c=>c.type===activeFilter);
+  const f = base.filter(c => (c.year||2020) <= currentYear);
+  applyPoints(f);
+  document.getElementById('stat-companies').textContent = f.length;
+  updateCapital(f);
+}
+
+function resetTimeline(){
+  currentYear = 2026;
+  document.getElementById('timeline-slider').value = 2026;
+  document.getElementById('timeline-year').textContent = 'All';
+  const f = activeFilter==='all' ? COMPANIES : COMPANIES.filter(c=>c.type===activeFilter);
+  applyPoints(f);
+  document.getElementById('stat-companies').textContent = f.length;
+  updateCapital(f);
+}
+
+// ── SHARED POINT APPLIER ──────────────────────────────────────────────────────
+function applyPoints(companies){
+  globe.pointsData(companies)
+    .pointLat('lat').pointLng('lng')
+    .pointColor(d=>TYPE_COLORS[d.type]||'#888')
+    .pointAltitude(0.02)
+    .pointRadius(d=>d.il_covered?0.5:0.3);
+  document.getElementById('stat-companies').textContent = companies.length;
+  updateCapital(companies);
+}
+
 buildGlobe();
 loadFeed();
 setInterval(loadFeed,15*60*1000);
+// Init capital counter
+updateCapital(COMPANIES);
 
 // On mobile, start with sidebar hidden so globe gets full screen
 if(window.innerWidth <= 768){
