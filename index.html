@@ -654,9 +654,13 @@ function connectAIS(){
   };
 
   let msgCount = 0;
-  shipSocket.onmessage = (event) => {
+  shipSocket.onmessage = async (event) => {
     try{
-      const msg = JSON.parse(event.data);
+      // Handle both text and binary (Blob) responses
+      const raw = event.data instanceof Blob
+        ? await event.data.text()
+        : event.data;
+      const msg = JSON.parse(raw);
       msgCount++;
       if(msgCount <= 5) console.log('AIS #'+msgCount+':', JSON.stringify(msg).substring(0,400));
 
@@ -686,7 +690,7 @@ function connectAIS(){
       const count = Object.keys(shipData).length;
       document.getElementById('ship-count').textContent = count + ' vessels tracked';
       if(count === 1) renderShips(); // Render immediately on first ship
-    }catch(e){ console.error('AIS error:', e, event.data?.substring(0,200)); }
+    }catch(e){ console.error('AIS error:', e); }
   };
 
   shipSocket.onerror = (e) => {
