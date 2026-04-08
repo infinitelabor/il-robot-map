@@ -31,13 +31,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 .density-btn{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:5px 8px;border:0.5px solid rgba(191,51,24,0.3);cursor:pointer;background:transparent;color:#bf3318;transition:all 0.15s;margin-left:3px;flex-shrink:0}
 .density-btn:hover{background:rgba(191,51,24,0.1)}
 .density-btn.on{background:rgba(191,51,24,0.18);border-color:var(--red);color:#f06040}
-.ships-btn{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:5px 8px;border:0.5px solid rgba(55,138,221,0.3);cursor:pointer;background:transparent;color:#378ADD;transition:all 0.15s;margin-left:3px;flex-shrink:0;white-space:nowrap}
-.ships-btn:hover{background:rgba(55,138,221,0.1)}
-.ships-btn.on{background:rgba(55,138,221,0.18);border-color:#378ADD;color:#6ab8ff}
-.ships-btn.connecting{color:#BA7517;border-color:rgba(186,117,23,0.4);animation:pulse 1s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-.ship-status{position:fixed;top:62px;right:310px;background:rgba(55,138,221,0.15);border:0.5px solid rgba(55,138,221,0.4);padding:5px 14px;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#378ADD;display:none;z-index:80}
-.ship-status.on{display:block}
+
 .header-sub{padding:0 14px;font-size:8px;color:#3a3630;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
 .header-sub a{color:var(--red);text-decoration:none}
 .header-sub a:hover{text-decoration:underline}
@@ -144,14 +138,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
     <button class="filter-btn" data-type="Picks & Shovels" onclick="setFilter('Picks & Shovels',this)">Infra</button>
     <button class="filter-btn" data-type="Software Automation" onclick="setFilter('Software Automation',this)">Software</button>
     <button class="density-btn" id="density-btn" onclick="toggleDensity()">⬡ Density</button>
-    <button class="ships-btn" id="ships-btn" onclick="toggleShips()">⛵ Live Ships</button>
   </div>
   <div class="header-sub">
     <a href="https://infinitelabor.substack.com" target="_blank">Subscribe →</a>
   </div>
 </div>
 
-<div class="ship-status" id="ship-status">⛵ Live cargo ships — hover for vessel details</div>
 <div class="density-status" id="density-status">⬡ Robot density active — darker red = more robots per worker. Hover any country for the number.</div>
 
 <div class="layout">
@@ -172,12 +164,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
         <div class="legend-item"><div class="legend-line" style="background:#378ADD"></div>Deployment</div>
         <div class="legend-item"><div class="legend-line" style="background:#BA7517"></div>Partnership</div>
       </div>
-      <div class="ships-legend" id="ships-legend" style="margin-top:7px;padding-top:7px;border-top:0.5px solid #1a1814;display:none">
-        <div class="legend-title">Live ships</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#378ADD;opacity:0.8"></div>Cargo vessel</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#6ab8ff;opacity:0.8"></div>Tanker</div>
-        <div class="legend-item" style="font-size:7px;color:#2a2620;margin-top:3px" id="ship-count">0 vessels tracked</div>
-      </div>
+
       <div class="density-legend" id="density-legend">
         <div class="legend-title">Robots / 10k workers</div>
         <div class="density-grad"></div>
@@ -592,147 +579,8 @@ async function loadFeed(){
   feed.innerHTML=items.map(i=>`<a class="news-item" href="${i.link}" target="_blank" rel="noopener"><div class="news-source">${i.source}</div><div class="news-hed">${i.title}</div><div class="news-time">${timeAgo(i.date)}</div></a>`).join('');
 }
 
-// ── LIVE SHIPS (AIS) ─────────────────────────────────────────────────────────
-const AIS_API_KEY = 'a13c07cd7dff28a9a94e4413eabba3b21d0bab9a';
 
-// Correct format: array of [southwest, northeast] pairs as [lat,lng]
-const SHIP_BOXES = [
-  [[20, 115], [40, 130]],   // East China Sea
-  [[1,  100], [15, 115]],   // Strait of Malacca
-  [[30,-130], [50,-115]],   // US West Coast
-  [[-5,  95], [25, 115]],   // South China Sea
-  [[50,  -10],[60,  10]],   // North Sea
-];
 
-let shipsOn = false;
-let shipSocket = null;
-let shipData = {};
-let shipRenderTimer = null;
-
-function toggleShips(){
-  shipsOn = !shipsOn;
-  const btn = document.getElementById('ships-btn');
-  const status = document.getElementById('ship-status');
-  const legend = document.getElementById('ships-legend');
-
-  if(shipsOn){
-    btn.classList.add('connecting');
-    btn.textContent = '⛵ Connecting...';
-    connectAIS();
-  } else {
-    disconnectAIS();
-    btn.classList.remove('on','connecting');
-    btn.textContent = '⛵ Live Ships';
-    status.classList.remove('on');
-    legend.style.display = 'none';
-    globe.htmlElementsData([]);
-    shipData = {};
-    document.getElementById('ship-count').textContent = '0 vessels tracked';
-  }
-}
-
-function connectAIS(){
-  if(shipSocket) try{ shipSocket.close(); }catch(e){}
-  shipSocket = new WebSocket('wss://stream.aisstream.io/v0/stream');
-
-  shipSocket.onopen = () => {
-    console.log('AIS connected, subscribing...');
-    const sub = {
-      APIKey: AIS_API_KEY,
-      BoundingBoxes: SHIP_BOXES,
-      FilterMessageTypes: ['PositionReport']
-    };
-    console.log('Sending:', JSON.stringify(sub));
-    shipSocket.send(JSON.stringify(sub));
-
-    document.getElementById('ships-btn').classList.remove('connecting');
-    document.getElementById('ships-btn').classList.add('on');
-    document.getElementById('ships-btn').textContent = '⛵ Ships Live';
-    document.getElementById('ship-status').classList.add('on');
-    document.getElementById('ships-legend').style.display = 'block';
-    shipRenderTimer = setInterval(renderShips, 3000);
-  };
-
-  let msgCount = 0;
-  shipSocket.onmessage = async (event) => {
-    try{
-      // Handle both text and binary (Blob) responses
-      const raw = event.data instanceof Blob
-        ? await event.data.text()
-        : event.data;
-      const msg = JSON.parse(raw);
-      msgCount++;
-      if(msgCount <= 5) console.log('AIS #'+msgCount+':', JSON.stringify(msg).substring(0,400));
-
-      // Try every possible field path the API might use
-      const meta = msg.MetaData || msg.metadata || {};
-      const pos = (msg.Message && msg.Message.PositionReport) || msg.PositionReport || {};
-      
-      const mmsi = String(
-        meta.MMSI || meta.mmsi || 
-        pos.UserID || pos.MMSI || 
-        msg.MMSI || ''
-      );
-      if(!mmsi || mmsi==='0') return;
-
-      const lat = pos.Latitude ?? pos.latitude ?? meta.latitude_d ?? meta.Latitude;
-      const lng = pos.Longitude ?? pos.longitude ?? meta.longitude_d ?? meta.Longitude;
-
-      if(lat == null || lng == null) return;
-      if(lat === 0 && lng === 0) return;
-
-      if(!shipData[mmsi]) shipData[mmsi] = {};
-      shipData[mmsi].lat = lat;
-      shipData[mmsi].lng = lng;
-      shipData[mmsi].speed = pos.Sog || pos.sog || 0;
-      shipData[mmsi].name = (meta.ShipName || meta.shipName || 'Vessel').trim();
-
-      const count = Object.keys(shipData).length;
-      document.getElementById('ship-count').textContent = count + ' vessels tracked';
-      if(count === 1) renderShips(); // Render immediately on first ship
-    }catch(e){ console.error('AIS error:', e); }
-  };
-
-  shipSocket.onerror = (e) => {
-    console.error('AIS socket error:', e);
-    document.getElementById('ships-btn').classList.remove('connecting','on');
-    document.getElementById('ships-btn').textContent = '⛵ Error';
-  };
-
-  shipSocket.onclose = (e) => {
-    console.log('AIS closed:', e.code, e.reason);
-    if(shipsOn) setTimeout(connectAIS, 5000);
-  };
-}
-
-function disconnectAIS(){
-  if(shipRenderTimer){ clearInterval(shipRenderTimer); shipRenderTimer=null; }
-  if(shipSocket){ try{shipSocket.close();}catch(e){} shipSocket=null; }
-}
-
-function renderShips(){
-  const ships = Object.values(shipData).filter(s => s.lat != null && s.lng != null);
-  if(!ships.length) return;
-  console.log('Rendering', ships.length, 'ships');
-
-  // Use htmlElementsData — completely separate from company points, always visible
-  globe.htmlElementsData(ships)
-    .htmlLat('lat')
-    .htmlLng('lng')
-    .htmlAltitude(0.01)
-    .htmlElement(d => {
-      const el = document.createElement('div');
-      el.style.cssText = `
-        width:6px;height:6px;border-radius:50%;
-        background:rgba(55,138,221,0.9);
-        border:1px solid rgba(106,184,255,0.8);
-        cursor:pointer;pointer-events:auto;
-        box-shadow:0 0 4px rgba(55,138,221,0.6);
-      `;
-      el.title = `${d.name||'Vessel'} · ${(d.speed||0).toFixed(1)} kts`;
-      return el;
-    });
-}
 
 buildGlobe();
 loadFeed();
