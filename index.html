@@ -37,18 +37,47 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 .header-sub a:hover{text-decoration:underline}
 
 .layout{position:fixed;top:80px;left:0;right:0;bottom:0;display:flex}
-.globe-container{flex:1;position:relative;overflow:hidden}
+
+/* ── COMPANY LIST (LEFT) ── */
+.company-list{width:220px;flex-shrink:0;border-right:1px solid #1a1814;display:flex;flex-direction:column;background:#0a0908;position:relative;transition:width 0.3s cubic-bezier(0.16,1,0.3,1);overflow:visible;z-index:10}
+.company-list.hidden{width:0}
+.company-list.hidden .company-list-inner{opacity:0;pointer-events:none}
+.company-list-inner{width:220px;height:100%;display:flex;flex-direction:column;overflow:hidden;transition:opacity 0.2s}
+.company-list-toggle{position:absolute;right:-28px;top:50%;transform:translateY(-50%);width:28px;height:48px;background:#0a0908;border:0.5px solid #1a1814;border-left:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:#4a4440;z-index:12;transition:color 0.15s}
+.company-list-toggle:hover{color:#f0ece2}
+.company-list-header{padding:10px 14px;border-bottom:1px solid #1a1814;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.company-list-title{font-size:7px;letter-spacing:3px;text-transform:uppercase;color:#3a3630}
+.company-list-count{font-size:7px;color:#2a2620;letter-spacing:1px}
+.company-scroll{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1a1814 transparent}
+.company-scroll::-webkit-scrollbar{width:2px}
+.company-scroll::-webkit-scrollbar-thumb{background:#1a1814}
+.company-entry{padding:8px 14px;border-bottom:1px solid #0e0c0a;cursor:pointer;transition:background 0.1s;white-space:nowrap}
+.company-entry:hover{background:rgba(191,51,24,0.06)}
+.company-entry-name{font-size:10px;color:#a4a09a;line-height:1.3;overflow:hidden;text-overflow:ellipsis}
+.company-entry-name.il{color:#f0ece2}
+.company-entry-sub{font-size:8px;color:#3a3630;letter-spacing:0.5px;margin-top:1px;overflow:hidden;text-overflow:ellipsis}
+.company-entry-dot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:4px;vertical-align:middle}
+
+/* ── GLOBE ── */
+.globe-container{flex:1;position:relative;overflow:hidden;min-width:0}
 #globe-canvas{width:100%;height:100%}
 
 /* SIDEBAR */
-.sidebar{width:290px;flex-shrink:0;border-left:1px solid #1a1814;display:flex;flex-direction:column;background:#0a0908;transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);position:relative;z-index:10}
-.sidebar.hidden{transform:translateX(100%);position:absolute;right:0;top:0;bottom:0}
-.sidebar-toggle{position:absolute;left:-32px;top:50%;transform:translateY(-50%);width:32px;height:56px;background:#0a0908;border:0.5px solid #1a1814;border-right:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:#4a4440;z-index:11;transition:color 0.15s}
+/* ── SIDEBAR (RIGHT) ── */
+.sidebar{width:290px;flex-shrink:0;border-left:1px solid #1a1814;display:flex;flex-direction:column;background:#0a0908;position:relative;transition:width 0.3s cubic-bezier(0.16,1,0.3,1);overflow:visible;z-index:10}
+.sidebar.hidden{width:0}
+.sidebar.hidden .sidebar-inner{opacity:0;pointer-events:none}
+.sidebar-inner{width:290px;height:100%;display:flex;flex-direction:column;overflow:hidden;transition:opacity 0.2s}
+.sidebar-toggle{position:absolute;left:-28px;top:50%;transform:translateY(-50%);width:28px;height:48px;background:#0a0908;border:0.5px solid #1a1814;border-right:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:#4a4440;z-index:12;transition:color 0.15s}
 .sidebar-toggle:hover{color:#f0ece2}
 @media(max-width:768px){
-  .sidebar{position:absolute;right:0;top:0;bottom:0;z-index:20;width:280px;box-shadow:-4px 0 20px rgba(0,0,0,0.8)}
-  .sidebar.hidden{transform:translateX(100%)}
-  .sidebar-toggle{left:-32px}
+  /* Sidebar overlays on mobile */
+  .sidebar{position:absolute;right:0;top:0;bottom:0;z-index:20;width:0;box-shadow:-4px 0 20px rgba(0,0,0,0.8)}
+  .sidebar-inner{width:280px}
+  /* Company list overlays on mobile */
+  .company-list{position:absolute;left:0;top:0;bottom:0;z-index:20;width:0;box-shadow:4px 0 20px rgba(0,0,0,0.8)}
+  .company-list-inner{width:240px}
+  .company-list.hidden{width:0}
   .header{flex-wrap:nowrap;overflow:visible}
   .header-brand{flex-shrink:0;padding:0 10px}
   .brand-tag{display:none}
@@ -117,7 +146,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 .density-status.on{display:block}
 
 /* TICKER TAPE */
-.ticker-wrap{width:100%;background:#080706;border-bottom:1px solid #1a1814;height:28px;overflow:hidden;position:relative;z-index:90}
+.ticker-wrap{width:100%;background:#080706;border-bottom:1px solid #1a1814;height:28px;overflow:hidden;position:relative;z-index:90;transition:height 0.25s ease}
+.ticker-wrap.hidden{height:0;border-bottom:none}
+.ticker-toggle{position:absolute;right:0;top:0;height:28px;width:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:8px;color:#3a3630;z-index:2;background:#080706;border-left:1px solid #1a1814;font-family:var(--mono)}
+.ticker-toggle:hover{color:#f0ece2}
 .ticker-track{display:flex;width:max-content;animation:tickerScroll 90s linear infinite;align-items:center;height:28px}
 .ticker-track:hover{animation-play-state:paused}
 .ticker-item{display:flex;align-items:center;gap:6px;padding:0 18px;font-family:var(--mono);font-size:10px;white-space:nowrap;cursor:default}
@@ -183,6 +215,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 <div class="ticker-wrap" id="ticker-wrap">
   <div class="ticker-loading" id="ticker-loading">Loading market data...</div>
   <div class="ticker-track" id="ticker-track" style="display:none"></div>
+  <div class="ticker-toggle" onclick="toggleTicker()" title="Hide ticker">▲</div>
 </div>
 <div class="density-status" id="density-status">⬡ Robot density active — darker red = more robots per worker. Hover any country for the number.</div>
 
@@ -195,6 +228,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 </div>
 
 <div class="layout">
+  <div class="company-list" id="company-list">
+    <div class="company-list-toggle" id="cl-toggle" onclick="toggleCompanyList()">▶</div>
+    <div class="company-list-inner">
+      <div class="company-list-header">
+        <span class="company-list-title">Companies</span>
+        <span class="company-list-count" id="cl-count">78</span>
+      </div>
+      <div class="company-scroll" id="company-scroll"></div>
+    </div>
+  </div>
   <div class="globe-container" id="globe-wrap">
     <div id="globe-canvas"></div>
 
@@ -233,13 +276,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
   </div>
 
   <div class="sidebar" id="sidebar">
-    <div class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle feed">▶</div>
-    <div class="sidebar-header">
-      <span class="sidebar-title">Live Feed</span>
-      <span class="sidebar-count" id="feed-count">Loading...</span>
-    </div>
-    <div class="news-feed" id="news-feed">
-      <div class="news-loading">Fetching robotics news...</div>
+    <div class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">◀</div>
+    <div class="sidebar-inner">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Live Feed</span>
+        <span class="sidebar-count" id="feed-count">Loading...</span>
+      </div>
+      <div class="news-feed" id="news-feed">
+        <div class="news-loading">Fetching robotics news...</div>
+      </div>
     </div>
   </div>
 </div>
@@ -589,7 +634,21 @@ function toggleSidebar(){
   const sb=document.getElementById('sidebar');
   const btn=document.getElementById('sidebar-toggle');
   sb.classList.toggle('hidden',!sidebarVisible);
-  btn.textContent=sidebarVisible?'▶':'◀';
+  btn.textContent=sidebarVisible?'◀':'▶';
+  setTimeout(()=>globe.width(document.getElementById('globe-wrap').offsetWidth).height(document.getElementById('globe-wrap').offsetHeight), 320);
+}
+
+let tickerVisible=true;
+function toggleTicker(){
+  tickerVisible=!tickerVisible;
+  const wrap=document.getElementById('ticker-wrap');
+  const btn=wrap.querySelector('.ticker-toggle');
+  wrap.classList.toggle('hidden',!tickerVisible);
+  btn.textContent=tickerVisible?'▲':'▼';
+  // Adjust layout top
+  document.querySelector('.layout').style.top = tickerVisible ? '80px' : '52px';
+  document.getElementById('density-status').style.top = tickerVisible ? '90px' : '62px';
+  setTimeout(()=>globe.width(document.getElementById('globe-wrap').offsetWidth).height(document.getElementById('globe-wrap').offsetHeight), 280);
 }
 
 document.getElementById('search').addEventListener('input',function(){
@@ -780,6 +839,44 @@ function resetTimeline(){
   updateCapital(f);
 }
 
+// ── COMPANY LIST ─────────────────────────────────────────────────────────────
+let companyListVisible = true;
+
+function renderCompanyList(companies){
+  const scroll = document.getElementById('company-scroll');
+  document.getElementById('cl-count').textContent = companies.length;
+  
+  // Sort alphabetically
+  const sorted = [...companies].sort((a,b)=>a.name.localeCompare(b.name));
+  
+  scroll.innerHTML = sorted.map(c => {
+    const color = TYPE_COLORS[c.type] || '#888';
+    return `<div class="company-entry" onclick="flyToCompany('${c.name.replace(/'/g,"\'")}')">
+      <div class="company-entry-name${c.il_covered?' il':''}">
+        <span class="company-entry-dot" style="background:${color}"></span>${c.name}
+      </div>
+      <div class="company-entry-sub">${c.hq}</div>
+    </div>`;
+  }).join('');
+}
+
+function flyToCompany(name){
+  const c = COMPANIES.find(x=>x.name===name);
+  if(!c) return;
+  globe.pointOfView({lat:c.lat,lng:c.lng,altitude:1.5},800);
+  globe.controls().autoRotate=false;
+  setTimeout(()=>openPanel(c),900);
+}
+
+function toggleCompanyList(){
+  companyListVisible = !companyListVisible;
+  const cl = document.getElementById('company-list');
+  const btn = document.getElementById('cl-toggle');
+  cl.classList.toggle('hidden', !companyListVisible);
+  btn.textContent = companyListVisible ? '◀' : '▶';
+  setTimeout(()=>globe.width(document.getElementById('globe-wrap').offsetWidth).height(document.getElementById('globe-wrap').offsetHeight), 320);
+}
+
 // ── SHARED POINT APPLIER ──────────────────────────────────────────────────────
 function applyPoints(companies){
   globe.pointsData(companies)
@@ -789,19 +886,24 @@ function applyPoints(companies){
     .pointRadius(d=>d.il_covered?0.5:0.3);
   document.getElementById('stat-companies').textContent = companies.length;
   updateCapital(companies);
+  renderCompanyList(companies);
 }
 
 buildGlobe();
 loadFeed();
 setInterval(loadFeed,15*60*1000);
-// Init capital counter
+// Init capital counter and company list
 updateCapital(COMPANIES);
+renderCompanyList(COMPANIES);
 
-// On mobile, start with sidebar hidden so globe gets full screen
+// On mobile, start with both panels hidden so globe gets full screen
 if(window.innerWidth <= 768){
   sidebarVisible = false;
   document.getElementById('sidebar').classList.add('hidden');
-  document.getElementById('sidebar-toggle').textContent = '◀';
+  document.getElementById('sidebar-toggle').textContent = '▶';
+  companyListVisible = false;
+  document.getElementById('company-list').classList.add('hidden');
+  document.getElementById('cl-toggle').textContent = '▶';
 }
 </script>
 </body>
