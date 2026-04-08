@@ -593,31 +593,21 @@ async function loadFeed(){
 }
 
 // ── LIVE SHIPS (AIS) ─────────────────────────────────────────────────────────
-// Get your FREE API key at aisstream.io — takes 2 minutes
 const AIS_API_KEY = 'a13c07cd7dff28a9a94e4413eabba3b21d0bab9a';
 
-// Bounding boxes covering major robotics supply chain shipping lanes:
-// East China Sea, South China Sea, Pacific, US West Coast, Strait of Malacca, North Sea
+// Correct format: array of [southwest, northeast] pairs as [lat,lng]
 const SHIP_BOXES = [
-  [[20, 115], [40, 130]],    // East China Sea (China/Japan/Korea exports)
-  [[1, 100],  [15, 115]],    // Strait of Malacca (global chokepoint)
-  [[30, -130],[50, -115]],   // US West Coast approach
-  [[-5, 95],  [25, 115]],    // South China Sea
-  [[50, -10], [60, 10]],     // North Sea (Europe)
-  [[35, 25],  [45, 40]],     // Eastern Mediterranean
+  [[20, 115], [40, 130]],   // East China Sea
+  [[1,  100], [15, 115]],   // Strait of Malacca
+  [[30,-130], [50,-115]],   // US West Coast
+  [[-5,  95], [25, 115]],   // South China Sea
+  [[50,  -10],[60,  10]],   // North Sea
 ];
 
 let shipsOn = false;
 let shipSocket = null;
-let shipData = {};  // mmsi -> {lat, lng, name, dest, speed, type}
-let shipUpdateTimer = null;
-
-const SHIP_TYPE_COLOR = (typeCode) => {
-  if(typeCode>=70&&typeCode<=79) return '#378ADD'; // cargo
-  if(typeCode>=80&&typeCode<=89) return '#6ab8ff'; // tanker
-  if(typeCode>=60&&typeCode<=69) return '#BA7517'; // passenger
-  return '#4a8acc';
-};
+let shipData = {};
+let shipRenderTimer = null;
 
 function toggleShips(){
   shipsOn = !shipsOn;
@@ -626,11 +616,6 @@ function toggleShips(){
   const legend = document.getElementById('ships-legend');
 
   if(shipsOn){
-    if(AIS_API_KEY === 'YOUR_AISSTREAM_API_KEY_HERE'){
-      alert('Add your free AIS API key from aisstream.io to enable live ships.');
-      shipsOn = false;
-      return;
-    }
     btn.classList.add('connecting');
     btn.textContent = '⛵ Connecting...';
     connectAIS();
@@ -640,35 +625,32 @@ function toggleShips(){
     btn.textContent = '⛵ Live Ships';
     status.classList.remove('on');
     legend.style.display = 'none';
-    // Restore company-only points
-    const f = activeFilter==='all' ? COMPANIES : COMPANIES.filter(c=>c.type===activeFilter);
-    globe.pointsData(f)
-      .pointLat('lat').pointLng('lng')
-      .pointColor(d=>TYPE_COLORS[d.type]||'#888')
-      .pointAltitude(0.02)
-      .pointRadius(d=>d.il_covered?0.5:0.3)
-      .onPointClick(d=>openPanel(d));
+    globe.htmlElementsData([]);
     shipData = {};
+    document.getElementById('ship-count').textContent = '0 vessels tracked';
   }
 }
 
 function connectAIS(){
-  if(shipSocket) shipSocket.close();
+  if(shipSocket) try{ shipSocket.close(); }catch(e){}
   shipSocket = new WebSocket('wss://stream.aisstream.io/v0/stream');
 
   shipSocket.onopen = () => {
-    shipSocket.send(JSON.stringify({
-      Apikey: AIS_API_KEY,
+    console.log('AIS connected, subscribing...');
+    const sub = {
+      APIKey: AIS_API_KEY,
       BoundingBoxes: SHIP_BOXES,
-      FilterMessageTypes: ['PositionReport','ShipStaticData']
-    }));
+      FilterMessageTypes: ['PositionReport']
+    };
+    console.log('Sending:', JSON.stringify(sub));
+    shipSocket.send(JSON.stringify(sub));
+
     document.getElementById('ships-btn').classList.remove('connecting');
     document.getElementById('ships-btn').classList.add('on');
     document.getElementById('ships-btn').textContent = '⛵ Ships Live';
     document.getElementById('ship-status').classList.add('on');
     document.getElementById('ships-legend').style.display = 'block';
-    // Start rendering ships every 5 seconds
-    shipUpdateTimer = setInterval(renderShips, 5000);
+    shipRenderTimer = setInterval(renderShips, 3000);
   };
 
   let msgCount = 0;
@@ -676,86 +658,76 @@ function connectAIS(){
     try{
       const msg = JSON.parse(event.data);
       msgCount++;
-      // Log first 3 messages to console for debugging
-      if(msgCount <= 3) console.log('AIS msg:', JSON.stringify(msg).substring(0,300));
+      if(msgCount <= 5) console.log('AIS #'+msgCount+':', JSON.stringify(msg).substring(0,400));
 
-      const meta = msg.MetaData || {};
-      const mmsi = String(meta.MMSI || meta.ShipMmsi || '');
-      if(!mmsi) return;
+      // Try every possible field path the API might use
+      const meta = msg.MetaData || msg.metadata || {};
+      const pos = (msg.Message && msg.Message.PositionReport) || msg.PositionReport || {};
+      
+      const mmsi = String(
+        meta.MMSI || meta.mmsi || 
+        pos.UserID || pos.MMSI || 
+        msg.MMSI || ''
+      );
+      if(!mmsi || mmsi==='0') return;
 
-      if(msg.MessageType === 'PositionReport'){
-        const pos = msg.Message?.PositionReport || {};
-        const lat = pos.Latitude ?? meta.latitude_d;
-        const lng = pos.Longitude ?? meta.longitude_d;
-        if(lat == null || lng == null) return;
-        if(!shipData[mmsi]) shipData[mmsi] = {};
-        shipData[mmsi].lat = lat;
-        shipData[mmsi].lng = lng;
-        shipData[mmsi].speed = pos.Sog || 0;
-      }
-      if(msg.MessageType === 'ShipStaticData'){
-        const st = msg.Message?.ShipStaticData || {};
-        if(!shipData[mmsi]) shipData[mmsi] = {};
-        shipData[mmsi].name = (meta.ShipName || st.Name || 'Unknown').trim();
-        shipData[mmsi].dest = (st.Destination || '—').trim();
-        shipData[mmsi].typeCode = st.Type || 0;
-      }
-      // Update count and render live
-      const count = Object.values(shipData).filter(s=>s.lat&&s.lng).length;
+      const lat = pos.Latitude ?? pos.latitude ?? meta.latitude_d ?? meta.Latitude;
+      const lng = pos.Longitude ?? pos.longitude ?? meta.longitude_d ?? meta.Longitude;
+
+      if(lat == null || lng == null) return;
+      if(lat === 0 && lng === 0) return;
+
+      if(!shipData[mmsi]) shipData[mmsi] = {};
+      shipData[mmsi].lat = lat;
+      shipData[mmsi].lng = lng;
+      shipData[mmsi].speed = pos.Sog || pos.sog || 0;
+      shipData[mmsi].name = (meta.ShipName || meta.shipName || 'Vessel').trim();
+
+      const count = Object.keys(shipData).length;
       document.getElementById('ship-count').textContent = count + ' vessels tracked';
-      // Render immediately on first ship, then every 10 messages
-      if(count === 1 || msgCount % 10 === 0) renderShips();
-    }catch(e){ console.error('AIS parse error:', e); }
+      if(count === 1) renderShips(); // Render immediately on first ship
+    }catch(e){ console.error('AIS error:', e, event.data?.substring(0,200)); }
   };
 
-  shipSocket.onerror = () => {
+  shipSocket.onerror = (e) => {
+    console.error('AIS socket error:', e);
     document.getElementById('ships-btn').classList.remove('connecting','on');
-    document.getElementById('ships-btn').textContent = '⛵ Ships Error';
+    document.getElementById('ships-btn').textContent = '⛵ Error';
   };
 
-  shipSocket.onclose = () => {
-    if(shipsOn){
-      // Auto-reconnect after 5s
-      setTimeout(connectAIS, 5000);
-    }
+  shipSocket.onclose = (e) => {
+    console.log('AIS closed:', e.code, e.reason);
+    if(shipsOn) setTimeout(connectAIS, 5000);
   };
 }
 
 function disconnectAIS(){
-  if(shipSocket){ shipSocket.close(); shipSocket = null; }
-  if(shipUpdateTimer){ clearInterval(shipUpdateTimer); shipUpdateTimer = null; }
+  if(shipRenderTimer){ clearInterval(shipRenderTimer); shipRenderTimer=null; }
+  if(shipSocket){ try{shipSocket.close();}catch(e){} shipSocket=null; }
 }
 
 function renderShips(){
-  const ships = Object.values(shipData).filter(s => s.lat && s.lng);
-  document.getElementById('ship-count').textContent = ships.length + ' vessels tracked';
+  const ships = Object.values(shipData).filter(s => s.lat != null && s.lng != null);
   if(!ships.length) return;
+  console.log('Rendering', ships.length, 'ships');
 
-  const shipPoints = ships.map(s => ({
-    lat: s.lat,
-    lng: s.lng,
-    name: (s.name||'Unknown').trim(),
-    dest: (s.dest||'—').trim(),
-    speed: s.speed||0,
-    color: SHIP_TYPE_COLOR(s.typeCode||0),
-  }));
-
-  // Combine companies + ships into one points layer
-  const companyPoints = (activeFilter==='all' ? COMPANIES : COMPANIES.filter(c=>c.type===activeFilter));
-  const allPoints = [
-    ...companyPoints.map(c=>({...c, isShip:false})),
-    ...shipPoints.map(s=>({...s, isShip:true}))
-  ];
-
-  globe.pointsData(allPoints)
-    .pointLat('lat').pointLng('lng')
-    .pointColor(d => d.isShip ? d.color : (TYPE_COLORS[d.type]||'#888'))
-    .pointAltitude(d => d.isShip ? 0.025 : 0.02)
-    .pointRadius(d => d.isShip ? 0.35 : (d.il_covered ? 0.5 : 0.3))
-    .pointLabel(d => d.isShip
-      ? `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(10,9,8,0.96);color:#f0ece2;padding:5px 9px;border:0.5px solid #2a2620;border-left:2px solid ${d.color};pointer-events:none"><strong style="color:${d.color}">${d.name}</strong><br><span style="color:#5a5448;font-size:8px">→ ${d.dest} · ${d.speed.toFixed(1)} kts</span></div>`
-      : `<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:rgba(10,9,8,0.96);color:#f0ece2;padding:6px 10px;border:0.5px solid #2a2620;border-left:2px solid ${TYPE_COLORS[d.type]};pointer-events:none">${d.name}<br><span style="color:#5a5448;font-size:9px">${d.type} · ${d.hq}</span></div>`)
-    .onPointClick(d => { if(!d.isShip) openPanel(d); });
+  // Use htmlElementsData — completely separate from company points, always visible
+  globe.htmlElementsData(ships)
+    .htmlLat('lat')
+    .htmlLng('lng')
+    .htmlAltitude(0.01)
+    .htmlElement(d => {
+      const el = document.createElement('div');
+      el.style.cssText = `
+        width:6px;height:6px;border-radius:50%;
+        background:rgba(55,138,221,0.9);
+        border:1px solid rgba(106,184,255,0.8);
+        cursor:pointer;pointer-events:auto;
+        box-shadow:0 0 4px rgba(55,138,221,0.6);
+      `;
+      el.title = `${d.name||'Vessel'} · ${(d.speed||0).toFixed(1)} kts`;
+      return el;
+    });
 }
 
 buildGlobe();
