@@ -150,8 +150,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 .ticker-wrap.hidden{height:0;border-bottom:none}
 .ticker-toggle{position:absolute;right:0;top:0;height:28px;width:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:8px;color:#3a3630;z-index:2;background:#080706;border-left:1px solid #1a1814;font-family:var(--mono)}
 .ticker-toggle:hover{color:#f0ece2}
-.ticker-track{display:inline-flex;animation:tickerScroll 60s linear infinite;align-items:center;height:28px;white-space:nowrap}
-.ticker-track:hover{animation-play-state:paused}
+.ticker-track{display:none;}
+
 .ticker-item{display:flex;align-items:center;gap:6px;padding:0 18px;font-family:var(--mono);font-size:10px;white-space:nowrap;cursor:default}
 .ticker-sym{color:#5a5448;letter-spacing:1px;font-size:9px}
 .ticker-price{color:#f0ece2}
@@ -160,7 +160,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:#f
 .ticker-chg.flat{color:#5a5448}
 .ticker-dot{color:#2a2620;margin:0 4px}
 .ticker-loading{font-family:var(--mono);font-size:9px;color:#3a3630;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;height:28px;padding:0 16px}
-@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
 
 
 /* IL WATCHLIST TOGGLE */
@@ -720,46 +720,42 @@ async function fetchTicker(){
 }
 
 function renderTicker(quotes){
-  const wrap = document.getElementById('ticker-wrap');
   const loading = document.getElementById('ticker-loading');
-  console.log('renderTicker called with', quotes.length, 'quotes');
+  const track = document.getElementById('ticker-track');
+  console.log('renderTicker:', quotes.length, 'quotes');
 
-  // Build one set of items
   let items = '';
   quotes.forEach(q => {
     const price = q.price.toFixed(2);
     const chgPct = q.chgPct;
     const arrow = chgPct >= 0 ? '▲' : '▼';
     const cls = chgPct > 0.1 ? 'up' : chgPct < -0.1 ? 'down' : 'flat';
-    items += `<span class="ticker-item"><span class="ticker-sym">${q.sym}</span><span class="ticker-price"> $${price}</span><span class="ticker-chg ${cls}"> ${arrow}${Math.abs(chgPct).toFixed(2)}%</span></span><span class="ticker-dot"> · </span>`;
+    items += `<span style="display:inline-flex;align-items:center;gap:4px;padding:0 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;white-space:nowrap">` +
+      `<span style="color:#5a5448;font-size:9px;letter-spacing:1px">${q.sym}</span>` +
+      `<span style="color:#f0ece2">$${price}</span>` +
+      `<span style="color:${cls==='up'?'#1D9E75':cls==='down'?'#E24B4A':'#5a5448'}">${arrow}${Math.abs(chgPct).toFixed(2)}%</span>` +
+      `</span><span style="color:#2a2620;padding:0 4px"> · </span>`;
   });
 
-  // Use marquee-style: inject a style tag with the exact pixel width for seamless loop
+  // Put doubled content directly in track
+  track.innerHTML = items + items;
+  track.style.display = 'flex';
+  track.style.alignItems = 'center';
+  track.style.height = '28px';
+  track.style.whiteSpace = 'nowrap';
   loading.style.display = 'none';
-  
-  // Remove old track and inject new scrolling div
-  const oldTrack = document.getElementById('ticker-track');
-  if(oldTrack) oldTrack.remove();
-  
-  const scrollDiv = document.createElement('div');
-  scrollDiv.id = 'ticker-track';
-  scrollDiv.style.cssText = 'display:inline-flex;align-items:center;height:28px;white-space:nowrap;animation:none;';
-  // Double content for seamless loop
-  scrollDiv.innerHTML = items + items;
-  wrap.insertBefore(scrollDiv, wrap.querySelector('.ticker-toggle'));
-  
-  // Get actual width of one set, then animate
-  requestAnimationFrame(()=>{
-    const fullW = scrollDiv.scrollWidth;
-    const halfW = fullW / 2;
-    // Inject keyframe with exact pixel value
-    let styleEl = document.getElementById('ticker-kf');
-    if(!styleEl){ styleEl = document.createElement('style'); styleEl.id='ticker-kf'; document.head.appendChild(styleEl); }
-    styleEl.textContent = `@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-${halfW}px)}}`;
-    scrollDiv.style.animation = 'tickerScroll 60s linear infinite';
-    scrollDiv.addEventListener('mouseenter',()=>scrollDiv.style.animationPlayState='paused');
-    scrollDiv.addEventListener('mouseleave',()=>scrollDiv.style.animationPlayState='running');
-  });
+
+  // Measure then animate with exact pixel value
+  setTimeout(()=>{
+    const halfW = track.scrollWidth / 2;
+    console.log('ticker width:', track.scrollWidth, 'animating to:', -halfW);
+    let kf = document.getElementById('ticker-kf');
+    if(!kf){ kf = document.createElement('style'); kf.id='ticker-kf'; document.head.appendChild(kf); }
+    kf.textContent = `@keyframes tscroll{from{transform:translateX(0)}to{transform:translateX(-${halfW}px)}}`;
+    track.style.animation = 'tscroll 55s linear infinite';
+    track.onmouseenter = ()=>{ track.style.animationPlayState='paused'; };
+    track.onmouseleave = ()=>{ track.style.animationPlayState='running'; };
+  }, 200);
 }
 
 function showStaticTicker(msg){
