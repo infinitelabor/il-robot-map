@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robot Image Sources — Infinite Labor</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@700;800&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #080A0E; color: #E8EAF0; font-family: 'IBM Plex Sans', sans-serif; padding: 40px 32px; max-width: 1100px; margin: 0 auto; }
+h1 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+.subtitle { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #7A8094; margin-bottom: 8px; }
+.summary { background: #0F1218; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px 20px; margin: 24px 0 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+.summary-item { display: flex; flex-direction: column; gap: 4px; }
+.summary-num { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #4A9EFF; }
+.summary-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #7A8094; letter-spacing: 0.1em; text-transform: uppercase; }
+
+.instructions { background: #0F1218; border: 1px solid rgba(255,255,255,0.08); border-left: 2px solid #2DD4A0; border-radius: 0 8px 8px 0; padding: 16px 20px; margin-bottom: 40px; }
+.instructions h3 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #2DD4A0; margin-bottom: 10px; }
+.instructions ol { padding-left: 18px; }
+.instructions li { font-size: 13px; color: #9BA3B8; line-height: 1.8; }
+.instructions code { font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; color: #E8EAF0; }
+
+.category-section { margin-bottom: 48px; }
+.cat-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.cat-name { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
+.cat-num-badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.15em; background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 2px; color: #7A8094; }
+
+.sub-section { margin-bottom: 28px; }
+.sub-header { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #7A8094; margin-bottom: 10px; padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 4px; }
+.sub-folder { font-size: 11px; color: rgba(255,255,255,0.25); margin-left: 8px; font-family: 'IBM Plex Mono', monospace; }
+
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #3D4255; padding: 6px 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
+td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+.save-path { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #7A8094; }
+.save-path b { color: #E8EAF0; }
+
+.source-link { color: #4A9EFF; text-decoration: none; font-size: 11px; display: block; margin-bottom: 3px; }
+.source-link:hover { text-decoration: underline; }
+.source-note { font-size: 10px; color: #3D4255; font-family: 'IBM Plex Mono', monospace; }
+.search-tip { font-size: 11px; color: #7A8094; font-family: 'IBM Plex Mono', monospace; }
+.search-tip::before { content: '🔍 '; }
+
+.badge-cc { display: inline-block; font-size: 9px; font-family: 'IBM Plex Mono', monospace; background: rgba(45, 212, 160, 0.1); color: #2DD4A0; border: 1px solid rgba(45, 212, 160, 0.3); padding: 1px 5px; border-radius: 2px; letter-spacing: 0.05em; }
+.badge-press { display: inline-block; font-size: 9px; font-family: 'IBM Plex Mono', monospace; background: rgba(255, 165, 0, 0.1); color: #FFA500; border: 1px solid rgba(255, 165, 0, 0.3); padding: 1px 5px; border-radius: 2px; letter-spacing: 0.05em; }
+.badge-limited { display: inline-block; font-size: 9px; font-family: 'IBM Plex Mono', monospace; background: rgba(255, 122, 74, 0.1); color: #FF7A4A; border: 1px solid rgba(255, 122, 74, 0.3); padding: 1px 5px; border-radius: 2px; letter-spacing: 0.05em; }
+
+.license-key { display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+.license-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #7A8094; }
+</style>
+</head>
+<body>
+
+<h1>Robot Image Sources</h1>
+<div class="subtitle">∞ Infinite Labor / Robot Field Guide — Complete image sourcing reference</div>
+
+<div class="summary">
+  <div class="summary-item"><div class="summary-num">62</div><div class="summary-label">Total images needed</div></div>
+  <div class="summary-item"><div class="summary-num">15</div><div class="summary-label">Sub-categories</div></div>
+  <div class="summary-item"><div class="summary-num">4</div><div class="summary-label">Main categories</div></div>
+  <div class="summary-item"><div class="summary-num">~40</div><div class="summary-label">CC-licensed on Wikimedia</div></div>
+  <div class="summary-item"><div class="summary-num">~22</div><div class="summary-label">Need press/company source</div></div>
+</div>
+
+<div class="license-key">
+  <div class="license-item"><span class="badge-cc">CC / Wikimedia</span> Free, downloadable, no restrictions</div>
+  <div class="license-item"><span class="badge-press">Press / Company</span> Usually free for editorial use — check terms</div>
+  <div class="license-item"><span class="badge-limited">Limited public images</span> Search company press kit or news coverage</div>
+</div>
+
+<div class="instructions">
+  <h3>How to use this guide</h3>
+  <ol>
+    <li>Create an <code>images/</code> folder inside your GitHub repo, then subfolders per sub-type (e.g. <code>images/delta-scara/</code>)</li>
+    <li>For each robot, visit the source URL, download the image, and save it using the exact filename shown</li>
+    <li>Images should ideally be <strong>800–1200px wide</strong>, landscape or square. The UI crops them to 220px height at full width.</li>
+    <li>To swap a photo later: just replace the file. No code changes needed. Same filename, same folder.</li>
+    <li>For Wikimedia Commons URLs: click the image on the page → click "Download" → choose "Original file" or a medium resolution</li>
+  </ol>
+</div>
+
+
+<!-- ══ FIXED-POST ══════════════════════════════════════════════════════════ -->
+<div class="category-section">
+  <div class="cat-header">
+    <div class="cat-name" style="color:#4A9EFF">Fixed-Post</div>
+    <div class="cat-num-badge">01 · 17 images</div>
+  </div>
+
+  <!-- Articulated Arms -->
+  <div class="sub-section">
+    <div class="sub-header">Articulated Arms <span class="sub-folder">→ images/articulated/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>FANUC</strong></td>
+        <td class="save-path">images/articulated/<b>fanuc.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://commons.wikimedia.org/wiki/Category:Fanuc_robots" target="_blank">commons.wikimedia.org → Category:Fanuc_robots</a>
+          <div class="source-note">Look for "FANUC R-2000iB series robot" images. Many good options.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>KUKA</strong></td>
+        <td class="save-path">images/articulated/<b>kuka.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/KUKA" target="_blank">en.wikipedia.org/wiki/KUKA</a>
+          <div class="source-note">Main article image or File:KUKA_Industrial_Robots_IR.jpg on Commons</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>ABB</strong></td>
+        <td class="save-path">images/articulated/<b>abb.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://commons.wikimedia.org/wiki/Category:ABB_(company)" target="_blank">commons.wikimedia.org → Category:ABB_(company)</a>
+          <div class="search-tip">Search: "ABB industrial robot arm"</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Yaskawa</strong></td>
+        <td class="save-path">images/articulated/<b>yaskawa.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Yaskawa_Electric" target="_blank">en.wikipedia.org/wiki/Yaskawa_Electric</a>
+          <div class="search-tip">Search Wikimedia: "Yaskawa Motoman robot"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Kawasaki</strong></td>
+        <td class="save-path">images/articulated/<b>kawasaki.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://robotics.kawasaki.com/en1/products/" target="_blank">robotics.kawasaki.com/en1/products/</a>
+          <div class="search-tip">Search: "Kawasaki duAro dual arm robot"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Cobots -->
+  <div class="sub-section">
+    <div class="sub-header">Cobots <span class="sub-folder">→ images/cobots/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>Universal Robots</strong></td>
+        <td class="save-path">images/cobots/<b>universal.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Universal_Robots" target="_blank">en.wikipedia.org/wiki/Universal_Robots</a>
+          <div class="source-note">File:UR16e_robot_arm.png on Commons — high quality</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Techman</strong></td>
+        <td class="save-path">images/cobots/<b>techman.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.tm-robot.com/en/tm-robot/" target="_blank">tm-robot.com — press images available</a>
+          <div class="search-tip">Search: "Techman TM cobot robot arm"</div>
+        </td>
+        <td><span class="badge-limited">Limited public images</span></td>
+      </tr>
+      <tr>
+        <td><strong>Doosan</strong></td>
+        <td class="save-path">images/cobots/<b>doosan.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.doosanrobotics.com/en/products/series/m-series" target="_blank">doosanrobotics.com — M-series product page</a>
+          <div class="search-tip">Search: "Doosan Robotics M-series cobot"</div>
+        </td>
+        <td><span class="badge-limited">Limited public images</span></td>
+      </tr>
+      <tr>
+        <td><strong>FANUC CRX</strong></td>
+        <td class="save-path">images/cobots/<b>fanuc-crx.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.fanuc.com/en-us/product/robot/p-id/CRX-10iA" target="_blank">fanuc.com — CRX product page</a>
+          <div class="search-tip">Search: "FANUC CRX collaborative robot green"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Delta/SCARA -->
+  <div class="sub-section">
+    <div class="sub-header">Delta / SCARA <span class="sub-folder">→ images/delta-scara/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>ABB FlexPicker</strong></td>
+        <td class="save-path">images/delta-scara/<b>abb.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Delta_robot" target="_blank">en.wikipedia.org/wiki/Delta_robot</a>
+          <div class="source-note">Wikipedia Delta Robot article has ABB FlexPicker images on Commons</div>
+          <a class="source-link" href="https://commons.wikimedia.org/wiki/File:IRB_360_FlexPicker.jpg" target="_blank">Direct: commons.wikimedia.org/wiki/File:IRB_360_FlexPicker.jpg</a>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Omron</strong></td>
+        <td class="save-path">images/delta-scara/<b>omron.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://industrial.omron.us/en/products/delta-robots" target="_blank">industrial.omron.us — Delta robots product page</a>
+          <div class="search-tip">Search: "Omron Adept Quattro delta robot"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Epson</strong></td>
+        <td class="save-path">images/delta-scara/<b>epson.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://epson.com/For-Work/Robots/SCARA/s/SPT_SCARA" target="_blank">epson.com — SCARA robots</a>
+          <div class="search-tip">Search: "Epson SCARA T-series robot arm"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Stäubli</strong></td>
+        <td class="save-path">images/delta-scara/<b>staubli.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.staubli.com/en/robot-systems/scara-robot/" target="_blank">staubli.com — SCARA product page</a>
+          <div class="search-tip">Search: "Stäubli TS2 SCARA robot pharmaceutical"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Surgical -->
+  <div class="sub-section">
+    <div class="sub-header">Surgical Robots <span class="sub-folder">→ images/surgical/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>Intuitive (da Vinci)</strong></td>
+        <td class="save-path">images/surgical/<b>intuitive.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Da_Vinci_surgical_system" target="_blank">en.wikipedia.org/wiki/Da_Vinci_surgical_system</a>
+          <div class="source-note">Well-documented on Commons. Multiple good photos available.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Stryker Mako</strong></td>
+        <td class="save-path">images/surgical/<b>stryker.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Mako_Surgical" target="_blank">en.wikipedia.org/wiki/Mako_Surgical</a>
+          <div class="search-tip">Search: "Stryker Mako robotic arm surgery"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Medtronic Hugo</strong></td>
+        <td class="save-path">images/surgical/<b>medtronic.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.medtronic.com/en-us/l/hugo-ras-system.html" target="_blank">medtronic.com — Hugo RAS system</a>
+          <div class="search-tip">Search: "Medtronic Hugo RAS surgical robot"</div>
+        </td>
+        <td><span class="badge-limited">Limited public images</span></td>
+      </tr>
+      <tr>
+        <td><strong>CMR Versius</strong></td>
+        <td class="save-path">images/surgical/<b>cmr.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://cmrsurgical.com/versius" target="_blank">cmrsurgical.com/versius — press images</a>
+          <div class="search-tip">Search: "CMR Versius surgical robot arm"</div>
+        </td>
+        <td><span class="badge-limited">Limited public images</span></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+
+<!-- ══ MOVERS ══════════════════════════════════════════════════════════════ -->
+<div class="category-section">
+  <div class="cat-header">
+    <div class="cat-name" style="color:#2DD4A0">Movers</div>
+    <div class="cat-num-badge">02 · 16 images</div>
+  </div>
+
+  <div class="sub-section">
+    <div class="sub-header">AMRs <span class="sub-folder">→ images/amrs/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>Amazon Robotics</strong></td>
+        <td class="save-path">images/amrs/<b>amazon.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Amazon_Robotics" target="_blank">en.wikipedia.org/wiki/Amazon_Robotics</a>
+          <div class="source-note">Orange Kiva/drive units — well documented. Also search "Amazon Proteus AMR"</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>GreyOrange</strong></td>
+        <td class="save-path">images/amrs/<b>greyor.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.greyorange.com/products/" target="_blank">greyorange.com — Ranger product</a>
+          <div class="search-tip">Search: "GreyOrange Ranger AMR warehouse robot"</div>
+        </td>
+        <td><span class="badge-limited">Limited public images</span></td>
+      </tr>
+      <tr>
+        <td><strong>Locus Robotics</strong></td>
+        <td class="save-path">images/amrs/<b>locus.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://locusrobotics.com/locus-origin/" target="_blank">locusrobotics.com — Origin product</a>
+          <div class="search-tip">Search: "Locus Robotics LocusBot warehouse"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Geek+</strong></td>
+        <td class="save-path">images/amrs/<b>geekplus.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.geekplus.com/products/" target="_blank">geekplus.com — products page</a>
+          <div class="search-tip">Search: "Geek Plus picking robot warehouse orange"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="sub-section">
+    <div class="sub-header">Delivery Robots <span class="sub-folder">→ images/delivery/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>Serve Robotics</strong></td>
+        <td class="save-path">images/delivery/<b>serve.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.serverobotics.com/" target="_blank">serverobotics.com — press images</a>
+          <div class="search-tip">Search: "Serve Robotics sidewalk delivery robot LA"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Starship</strong></td>
+        <td class="save-path">images/delivery/<b>starship.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Starship_Technologies" target="_blank">en.wikipedia.org/wiki/Starship_Technologies</a>
+          <div class="source-note">Good images on Wikipedia article. White six-wheeled bot.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Kiwibot</strong></td>
+        <td class="save-path">images/delivery/<b>kiwibot.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.kiwibot.com/" target="_blank">kiwibot.com — press images</a>
+          <div class="search-tip">Search: "Kiwibot delivery robot campus sidewalk"</div>
+        </td>
+        <td><span class="badge-limited">Limited public images</span></td>
+      </tr>
+      <tr>
+        <td><strong>Nuro</strong></td>
+        <td class="save-path">images/delivery/<b>nuro.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Nuro" target="_blank">en.wikipedia.org/wiki/Nuro</a>
+          <div class="source-note">Nuro R3 images on Wikipedia. Yellow compact delivery vehicle.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="sub-section">
+    <div class="sub-header">Autonomous Vehicles <span class="sub-folder">→ images/autonomous-vehicles/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>Waymo</strong></td>
+        <td class="save-path">images/autonomous-vehicles/<b>waymo.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Waymo" target="_blank">en.wikipedia.org/wiki/Waymo</a>
+          <div class="source-note">Multiple Commons images. White Jaguar i-Pace with sensor array.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Zoox</strong></td>
+        <td class="save-path">images/autonomous-vehicles/<b>zoox.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Zoox_(company)" target="_blank">en.wikipedia.org/wiki/Zoox_(company)</a>
+          <div class="search-tip">Search: "Zoox autonomous vehicle bidirectional"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Motional</strong></td>
+        <td class="save-path">images/autonomous-vehicles/<b>motional.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://motional.com/news/media" target="_blank">motional.com/news/media — press kit</a>
+          <div class="search-tip">Search: "Motional Ioniq 5 robotaxi autonomous"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Tesla Cybercab</strong></td>
+        <td class="save-path">images/autonomous-vehicles/<b>tesla.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Tesla_Cybercab" target="_blank">en.wikipedia.org/wiki/Tesla_Cybercab</a>
+          <div class="search-tip">Search: "Tesla Cybercab robotaxi 2024 reveal"</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="sub-section">
+    <div class="sub-header">Drones / UAVs <span class="sub-folder">→ images/drones/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>Zipline</strong></td>
+        <td class="save-path">images/drones/<b>zipline.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Zipline_(drone_delivery)" target="_blank">en.wikipedia.org/wiki/Zipline_(drone_delivery)</a>
+          <div class="source-note">Fixed-wing delivery drone. Good images on Wikipedia article.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Wing (Alphabet)</strong></td>
+        <td class="save-path">images/drones/<b>wing.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Wing_(company)" target="_blank">en.wikipedia.org/wiki/Wing_(company)</a>
+          <div class="search-tip">Search: "Wing Alphabet drone delivery white"</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Skydio</strong></td>
+        <td class="save-path">images/drones/<b>skydio.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Skydio" target="_blank">en.wikipedia.org/wiki/Skydio</a>
+          <div class="search-tip">Search: "Skydio 2 autonomous drone inspection"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>DJI</strong></td>
+        <td class="save-path">images/drones/<b>dji.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/DJI_(company)" target="_blank">en.wikipedia.org/wiki/DJI_(company)</a>
+          <div class="source-note">DJI Phantom/Mavic widely documented on Commons.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+
+<!-- ══ FIELD ROBOTS ════════════════════════════════════════════════════════ -->
+<div class="category-section">
+  <div class="cat-header">
+    <div class="cat-name" style="color:#FF7A4A">Field Robots</div>
+    <div class="cat-num-badge">03 · 21 images</div>
+  </div>
+
+  <div class="sub-section">
+    <div class="sub-header">Humanoids <span class="sub-folder">→ images/humanoids/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>Figure AI</strong></td>
+        <td class="save-path">images/humanoids/<b>figure.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.figure.ai/news" target="_blank">figure.ai/news — press releases with images</a>
+          <div class="search-tip">Search: "Figure 01 02 humanoid robot BMW"</div>
+        </td>
+        <td><span class="badge-limited">Limited public images</span></td>
+      </tr>
+      <tr>
+        <td><strong>Tesla Optimus</strong></td>
+        <td class="save-path">images/humanoids/<b>optimus.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Tesla_Optimus" target="_blank">en.wikipedia.org/wiki/Tesla_Optimus</a>
+          <div class="source-note">Tesla Bot reveal images available on Commons.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Boston Dynamics Atlas</strong></td>
+        <td class="save-path">images/humanoids/<b>atlas.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Atlas_(robot)" target="_blank">en.wikipedia.org/wiki/Atlas_(robot)</a>
+          <div class="source-note">Multiple high-quality images on Commons. New electric Atlas is white.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Agility Robotics (Digit)</strong></td>
+        <td class="save-path">images/humanoids/<b>digit.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://agilityrobotics.com/robots" target="_blank">agilityrobotics.com/robots — press page</a>
+          <div class="search-tip">Search: "Agility Robotics Digit bipedal robot Amazon"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Unitree H1</strong></td>
+        <td class="save-path">images/humanoids/<b>unitree.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.unitree.com/h1/" target="_blank">unitree.com/h1/ — product page</a>
+          <div class="search-tip">Search: "Unitree H1 humanoid robot black"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="sub-section">
+    <div class="sub-header">Quadrupeds <span class="sub-folder">→ images/quadrupeds/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>Boston Dynamics Spot</strong></td>
+        <td class="save-path">images/quadrupeds/<b>spot.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://commons.wikimedia.org/wiki/Category:Spot_(robot)" target="_blank">commons.wikimedia.org → Category:Spot_(robot)</a>
+          <div class="source-note">30 high-quality images available. Yellow quadruped — easy to find.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Unitree Go2</strong></td>
+        <td class="save-path">images/quadrupeds/<b>unitree-q.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.unitree.com/go2/" target="_blank">unitree.com/go2/ — product page</a>
+          <div class="search-tip">Search: "Unitree Go2 quadruped robot dog"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>ANYbotics ANYmal</strong></td>
+        <td class="save-path">images/quadrupeds/<b>anymal.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/ANYmal" target="_blank">en.wikipedia.org/wiki/ANYmal</a>
+          <div class="source-note">ANYmal C images available on Wikipedia.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Ghost Robotics</strong></td>
+        <td class="save-path">images/quadrupeds/<b>ghost.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.ghostrobotics.io/" target="_blank">ghostrobotics.io — press images</a>
+          <div class="search-tip">Search: "Ghost Robotics Vision 60 military quadruped"</div>
+        </td>
+        <td><span class="badge-limited">Limited public images</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="sub-section">
+    <div class="sub-header">Large Autonomous Machines <span class="sub-folder">→ images/large-machines/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>Caterpillar</strong></td>
+        <td class="save-path">images/large-machines/<b>caterpillar.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Caterpillar_Inc." target="_blank">en.wikipedia.org/wiki/Caterpillar_Inc.</a>
+          <div class="search-tip">Search: "Caterpillar 793 autonomous haul truck mine"</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Komatsu</strong></td>
+        <td class="save-path">images/large-machines/<b>komatsu.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Komatsu_Limited" target="_blank">en.wikipedia.org/wiki/Komatsu_Limited</a>
+          <div class="search-tip">Search: "Komatsu autonomous dump truck 930E FrontRunner"</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>John Deere 8R</strong></td>
+        <td class="save-path">images/large-machines/<b>john-deere.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/John_Deere" target="_blank">en.wikipedia.org/wiki/John_Deere</a>
+          <div class="source-note">8R autonomous tractor revealed at CES 2022 — many press photos</div>
+          <div class="search-tip">Search: "John Deere 8R autonomous tractor CES 2022"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>CNH Industrial</strong></td>
+        <td class="save-path">images/large-machines/<b>cnh.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.caseih.com/en-us/products/autonomous-concept-vehicle" target="_blank">caseih.com — Autonomous Concept Vehicle</a>
+          <div class="search-tip">Search: "Case IH autonomous concept vehicle tractor"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="sub-section">
+    <div class="sub-header">Underwater / AUVs <span class="sub-folder">→ images/underwater/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>Oceaneering</strong></td>
+        <td class="save-path">images/underwater/<b>oceaneering.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.oceaneering.com/rov-services/" target="_blank">oceaneering.com/rov-services/ — press images</a>
+          <div class="search-tip">Search: "Oceaneering ROV remotely operated vehicle deepwater"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Saab Seaeye</strong></td>
+        <td class="save-path">images/underwater/<b>saab-seaeye.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.saabseaeye.com/solutions/underwater-vehicles/falcon" target="_blank">saabseaeye.com — Falcon ROV</a>
+          <div class="search-tip">Search: "Saab Seaeye Falcon ROV underwater robot"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Kongsberg HUGIN</strong></td>
+        <td class="save-path">images/underwater/<b>kongsberg.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/HUGIN_(AUV)" target="_blank">en.wikipedia.org/wiki/HUGIN_(AUV)</a>
+          <div class="source-note">HUGIN AUV has Wikipedia entry with images.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Blue Robotics</strong></td>
+        <td class="save-path">images/underwater/<b>blue-robotics.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://bluerobotics.com/product-category/rov/" target="_blank">bluerobotics.com — BlueROV2 product</a>
+          <div class="search-tip">Search: "BlueROV2 underwater drone robot blue"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="sub-section">
+    <div class="sub-header">Space & Hazardous <span class="sub-folder">→ images/space-hazardous/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>NASA / JPL</strong></td>
+        <td class="save-path">images/space-hazardous/<b>nasa.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Perseverance_(rover)" target="_blank">en.wikipedia.org/wiki/Perseverance_(rover)</a>
+          <div class="source-note">NASA images are public domain. Excellent high-res options on both Wikipedia and nasa.gov.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>iRobot PackBot</strong></td>
+        <td class="save-path">images/space-hazardous/<b>irobot.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/IRobot_PackBot" target="_blank">en.wikipedia.org/wiki/IRobot_PackBot</a>
+          <div class="source-note">PackBot images available on Wikipedia.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Sarcos Guardian</strong></td>
+        <td class="save-path">images/space-hazardous/<b>sarcos.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.sarcos.com/products/guardian-gt/" target="_blank">sarcos.com/products/guardian-gt/</a>
+          <div class="search-tip">Search: "Sarcos Guardian GT teleoperated robot hazmat"</div>
+        </td>
+        <td><span class="badge-limited">Limited public images</span></td>
+      </tr>
+      <tr>
+        <td><strong>RE2 Robotics</strong></td>
+        <td class="save-path">images/space-hazardous/<b>re2.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.resquared.com/products" target="_blank">resquared.com/products — press images</a>
+          <div class="search-tip">Search: "RE2 Robotics manipulator arm DARPA"</div>
+        </td>
+        <td><span class="badge-limited">Limited public images</span></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+
+<!-- ══ AUGMENTERS ══════════════════════════════════════════════════════════ -->
+<div class="category-section">
+  <div class="cat-header">
+    <div class="cat-name" style="color:#9CA3AF">Augmenters</div>
+    <div class="cat-num-badge">— · 8 images</div>
+  </div>
+
+  <div class="sub-section">
+    <div class="sub-header">Exoskeletons <span class="sub-folder">→ images/exoskeletons/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>Sarcos Guardian XO</strong></td>
+        <td class="save-path">images/exoskeletons/<b>sarcos-exo.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.sarcos.com/products/guardian-xo/" target="_blank">sarcos.com/products/guardian-xo/</a>
+          <div class="search-tip">Search: "Sarcos Guardian XO full body exoskeleton"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Ekso Bionics</strong></td>
+        <td class="save-path">images/exoskeletons/<b>ekso.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Ekso_Bionics" target="_blank">en.wikipedia.org/wiki/Ekso_Bionics</a>
+          <div class="search-tip">Search: "Ekso Bionics EksoVest industrial exoskeleton Ford"</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Ottobock Paexo</strong></td>
+        <td class="save-path">images/exoskeletons/<b>paexo.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.ottobock.com/en-us/paexo" target="_blank">ottobock.com — Paexo product line</a>
+          <div class="search-tip">Search: "Ottobock Paexo back shoulder exoskeleton"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+      <tr>
+        <td><strong>Hyundai H-MEX</strong></td>
+        <td class="save-path">images/exoskeletons/<b>hyundai-exo.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Hyundai_Motor_Company" target="_blank">en.wikipedia.org/wiki/Hyundai — search exo</a>
+          <div class="search-tip">Search: "Hyundai H-MEX medical exoskeleton walking"</div>
+        </td>
+        <td><span class="badge-press">Press / Company</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="sub-section">
+    <div class="sub-header">Powered Prosthetics <span class="sub-folder">→ images/prosthetics/</span></div>
+    <table>
+      <tr><th>Company</th><th>Save as</th><th>Source</th><th>License</th></tr>
+      <tr>
+        <td><strong>Össur</strong></td>
+        <td class="save-path">images/prosthetics/<b>ossur.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/%C3%96ssur" target="_blank">en.wikipedia.org/wiki/Össur</a>
+          <div class="search-tip">Search: "Össur Power Knee prosthetic leg active"</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Open Bionics</strong></td>
+        <td class="save-path">images/prosthetics/<b>open-bio.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Open_Bionics" target="_blank">en.wikipedia.org/wiki/Open_Bionics</a>
+          <div class="source-note">Hero Arm images on Wikipedia. Colorful/stylized prosthetic hand.</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Ottobock</strong></td>
+        <td class="save-path">images/prosthetics/<b>ottobock-p.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://en.wikipedia.org/wiki/Ottobock" target="_blank">en.wikipedia.org/wiki/Ottobock</a>
+          <div class="search-tip">Search: "Ottobock Michelangelo prosthetic hand"</div>
+        </td>
+        <td><span class="badge-cc">CC / Wikimedia</span></td>
+      </tr>
+      <tr>
+        <td><strong>Unlimited Tomorrow</strong></td>
+        <td class="save-path">images/prosthetics/<b>unlimited.jpg</b></td>
+        <td>
+          <a class="source-link" href="https://www.unlimitedtomorrow.com/" target="_blank">unlimitedtomorrow.com — press images</a>
+          <div class="search-tip">Search: "Unlimited Tomorrow TrueLimb prosthetic arm"</div>
+        </td>
+        <td><span class="badge-limited">Limited public images</span></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div style="margin-top:40px;padding:20px;background:#0F1218;border:1px solid rgba(255,255,255,0.07);border-radius:8px;">
+  <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:8px;color:#7A8094;">Folder structure for your repo</div>
+  <pre style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9BA3B8;line-height:1.8;">images/
+├── articulated/        fanuc.jpg, kuka.jpg, abb.jpg, yaskawa.jpg, kawasaki.jpg
+├── cobots/             universal.jpg, techman.jpg, doosan.jpg, fanuc-crx.jpg
+├── delta-scara/        abb.jpg, omron.jpg, epson.jpg, staubli.jpg
+├── surgical/           intuitive.jpg, stryker.jpg, medtronic.jpg, cmr.jpg
+├── amrs/               amazon.jpg, greyor.jpg, locus.jpg, geekplus.jpg
+├── delivery/           serve.jpg, starship.jpg, kiwibot.jpg, nuro.jpg
+├── autonomous-vehicles/ waymo.jpg, zoox.jpg, motional.jpg, tesla.jpg
+├── drones/             zipline.jpg, wing.jpg, skydio.jpg, dji.jpg
+├── humanoids/          figure.jpg, optimus.jpg, atlas.jpg, digit.jpg, unitree.jpg
+├── quadrupeds/         spot.jpg, unitree-q.jpg, anymal.jpg, ghost.jpg
+├── large-machines/     caterpillar.jpg, komatsu.jpg, john-deere.jpg, cnh.jpg
+├── underwater/         oceaneering.jpg, saab-seaeye.jpg, kongsberg.jpg, blue-robotics.jpg
+├── space-hazardous/    nasa.jpg, irobot.jpg, sarcos.jpg, re2.jpg
+├── exoskeletons/       sarcos-exo.jpg, ekso.jpg, paexo.jpg, hyundai-exo.jpg
+└── prosthetics/        ossur.jpg, open-bio.jpg, ottobock-p.jpg, unlimited.jpg</pre>
+</div>
+
+</body>
+</html>

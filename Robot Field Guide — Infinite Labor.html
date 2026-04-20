@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robot Field Guide — Infinite Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080A0E;
+    --surface: #0F1218;
+    --surface2: #161B24;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(255,255,255,0.14);
+    --text-primary: #E8EAF0;
+    --text-secondary: #7A8094;
+    --text-dim: #3D4255;
+    --col1-w: 260px;
+    --col2-w: 300px;
+    --transition: 380ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--text-primary); font-family: 'IBM Plex Sans', sans-serif; overflow: hidden; }
+
+  /* ── HEADER ── */
+  .header { position: fixed; top: 0; left: 0; right: 0; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid var(--border); background: var(--bg); z-index: 100; }
+  .header-brand { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); }
+  .header-brand span { color: var(--text-primary); }
+  .breadcrumb { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 8px; }
+  .breadcrumb .crumb { color: var(--text-secondary); }
+  .breadcrumb .crumb.active { color: var(--text-primary); }
+  .breadcrumb .sep { color: var(--text-dim); font-size: 9px; }
+  .header-hint { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 0.05em; }
+
+  /* ── LAYOUT ── */
+  .explorer { position: fixed; top: 52px; bottom: 0; left: 0; right: 0; display: flex; overflow: hidden; }
+
+  /* ── COLUMNS ── */
+  .column { height: 100%; overflow-y: auto; overflow-x: hidden; flex-shrink: 0; border-right: 1px solid var(--border); transition: width var(--transition), opacity var(--transition), transform var(--transition); scrollbar-width: thin; scrollbar-color: var(--border-bright) transparent; }
+  .column::-webkit-scrollbar { width: 3px; }
+  .column::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+  .col1 { width: var(--col1-w); background: var(--bg); }
+  .col2 { width: 0; opacity: 0; transform: translateX(20px); background: var(--surface); pointer-events: none; }
+  .col2.visible { width: var(--col2-w); opacity: 1; transform: translateX(0); pointer-events: all; }
+  .col3 { width: 0; opacity: 0; transform: translateX(20px); background: var(--surface2); pointer-events: none; flex: 1; max-width: 460px; }
+  .col3.visible { width: 460px; opacity: 1; transform: translateX(0); pointer-events: all; }
+
+  /* ── COLUMN HEADERS ── */
+  .col-header { padding: 20px 20px 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: inherit; z-index: 10; }
+  .col-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+  .col-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text-secondary); }
+
+  /* ── CATEGORY ITEMS ── */
+  .cat-item { padding: 16px 20px; cursor: pointer; border-bottom: 1px solid var(--border); position: relative; transition: background 0.2s; display: flex; flex-direction: column; gap: 4px; }
+  .cat-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: transparent; transition: background 0.2s; }
+  .cat-item:hover { background: rgba(255,255,255,0.03); }
+  .cat-item.selected { background: rgba(255,255,255,0.04); }
+  .cat-item.selected::before { background: var(--cat-color, #4A9EFF); }
+  .cat-num { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--text-dim); letter-spacing: 0.1em; }
+  .cat-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between; transition: color 0.2s; }
+  .cat-item.selected .cat-name { color: var(--cat-color); }
+  .cat-arrow { font-size: 12px; opacity: 0; transform: translateX(-4px); transition: all 0.2s; color: var(--cat-color); }
+  .cat-item:hover .cat-arrow, .cat-item.selected .cat-arrow { opacity: 1; transform: translateX(0); }
+  .cat-tagline { font-size: 11px; color: var(--text-dim); font-family: 'IBM Plex Mono', monospace; }
+  .cat-market { font-size: 10px; font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+  .cat-item.augmenter { margin-top: 6px; }
+  .aug-badge { font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); border: 1px solid var(--border-bright); padding: 1px 5px; border-radius: 2px; display: inline-block; margin-bottom: 2px; }
+
+  /* ── SUB ITEMS ── */
+  .sub-item { padding: 14px 20px; cursor: pointer; border-bottom: 1px solid var(--border); position: relative; transition: background 0.2s; display: flex; flex-direction: column; gap: 3px; }
+  .sub-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: transparent; transition: background 0.2s; }
+  .sub-item:hover { background: rgba(255,255,255,0.03); }
+  .sub-item.selected { background: rgba(255,255,255,0.04); }
+  .sub-item.selected::before { background: var(--cat-color); }
+  .sub-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between; transition: color 0.2s; }
+  .sub-item.selected .sub-name { color: var(--cat-color); }
+  .sub-arrow { font-size: 11px; opacity: 0; transform: translateX(-4px); transition: all 0.2s; color: var(--cat-color); }
+  .sub-item:hover .sub-arrow, .sub-item.selected .sub-arrow { opacity: 1; transform: translateX(0); }
+  .sub-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
+  /* ── DETAIL PANEL ── */
+  .detail-content { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── IMAGE SECTION ── */
+  .detail-img-wrap { width: 100%; height: 220px; background: var(--surface); position: relative; overflow: hidden; }
+  .detail-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.35s ease; }
+  .detail-img-wrap img.loading { opacity: 0; }
+  .img-gradient { position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to top, var(--surface2) 0%, transparent 100%); pointer-events: none; }
+  .img-company-label { position: absolute; bottom: 12px; left: 16px; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.9); letter-spacing: 0.04em; }
+  .img-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+  .img-placeholder-icon { font-family: 'IBM Plex Mono', monospace; font-size: 28px; color: var(--text-dim); letter-spacing: 0.2em; }
+  .img-placeholder-text { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; }
+
+  /* ── DETAIL HEADER + BODY ── */
+  .detail-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
+  .detail-category-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+  .detail-name { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--text-primary); line-height: 1.2; margin-bottom: 8px; }
+  .detail-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.65; }
+  .detail-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
+  .detail-stat { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-left: 2px solid var(--cat-color, #4A9EFF); padding: 10px 14px; border-radius: 0 4px 4px 0; }
+  .detail-stat-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+  .detail-stat-value { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; line-height: 1.4; }
+  .detail-section-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+  .detail-text { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+
+  /* ── COMPANY PILLS (image selectors) ── */
+  .detail-companies { display: flex; flex-wrap: wrap; gap: 6px; }
+  .company-pill { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 5px 11px; border: 1px solid var(--border-bright); border-radius: 2px; color: var(--text-secondary); background: rgba(255,255,255,0.02); cursor: pointer; transition: all 0.15s ease; user-select: none; }
+  .company-pill:hover { border-color: var(--cat-color, #4A9EFF); color: var(--cat-color, #4A9EFF); background: rgba(255,255,255,0.04); }
+  .company-pill.active { border-color: var(--cat-color, #4A9EFF); color: var(--cat-color, #4A9EFF); background: rgba(255,255,255,0.06); }
+
+  /* ── EXAMPLE BOX ── */
+  .detail-example { background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 12px 14px; border-radius: 4px; }
+  .detail-example-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .detail-example-label::before { content: ''; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--cat-color, #4A9EFF); }
+  .detail-example-text { font-size: 12px; color: var(--text-secondary); line-height: 1.6; font-style: italic; }
+
+  /* ── OVERFLOW AREA ── */
+  .overflow-area { flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.2; }
+  .overflow-text { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; writing-mode: vertical-rl; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-brand"><span>INFINITE LABOR</span> / Robot Field Guide</div>
+  <div class="breadcrumb" id="breadcrumb"><span class="crumb active">Categories</span></div>
+  <div class="header-hint">Select to explore →</div>
+</header>
+
+<main class="explorer">
+  <div class="column col1" id="col1">
+    <div class="col-header">
+      <div class="col-label">01 / Overview</div>
+      <div class="col-title">Robot categories</div>
+    </div>
+    <div id="cat-list"></div>
+  </div>
+
+  <div class="column col2" id="col2">
+    <div class="col-header">
+      <div class="col-label">02 / Sub-types</div>
+      <div class="col-title" id="col2-title">—</div>
+    </div>
+    <div id="sub-list"></div>
+  </div>
+
+  <div class="column col3" id="col3">
+    <div id="detail-content"></div>
+  </div>
+
+  <div class="overflow-area"><span class="overflow-text">Infinite Labor</span></div>
+</main>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+// Image paths: ./images/{sub.id}/{company.id}.jpg
+// Companies array: { id, name, stat } per sub-type
+
+const DATA = [
+  {
+    id: 'fixed-post', num: '01', name: 'Fixed-Post',
+    tagline: 'Anchored precision work',
+    market: '$54B (2026) · 11.7% CAGR',
+    color: '#4A9EFF',
+    subs: [
+      {
+        id: 'articulated', name: 'Articulated arms',
+        desc: 'Six-axis jointed arms anchored to a floor or frame. The workhorse of global manufacturing for 50+ years.',
+        stat: '62% of the $54B industrial robot market',
+        detail: 'Six rotating joints give these robots a full sphere of motion around their base. Most industrial arms operate inside safety cages at speeds that would injure humans. Adoption is spreading from automotive into semiconductors, pharma, and food processing.',
+        example: 'Tesla Gigafactory runs ~1,000 articulated arms per production line, welding the Model Y body in under 90 seconds.',
+        companies: [
+          { id: 'fanuc',    name: 'FANUC',    stat: '750,000+ robots installed globally' },
+          { id: 'kuka',     name: 'KUKA',     stat: 'Powers BMW, Mercedes and Airbus lines' },
+          { id: 'abb',      name: 'ABB',      stat: '500,000+ robots across 53 countries' },
+          { id: 'yaskawa',  name: 'Yaskawa',  stat: '500,000+ Motoman robots shipped' },
+          { id: 'kawasaki', name: 'Kawasaki', stat: 'Pioneer in dual-arm assembly robots' },
+        ]
+      },
+      {
+        id: 'cobots', name: 'Cobots',
+        desc: 'Force-limited arms built to work next to humans safely. No cage required.',
+        stat: '27.5% CAGR — fastest-growing industrial segment',
+        detail: 'Collaborative robots use torque sensing to detect contact and stop instantly, removing the need for safety barriers. This opens automation to smaller manufacturers who can\'t dedicate floor space to caged systems.',
+        example: 'BMW deploys cobots on assembly lines for torque-critical bolt-tightening alongside human workers.',
+        companies: [
+          { id: 'universal', name: 'Universal Robots', stat: '75,000+ UR cobots in operation' },
+          { id: 'techman',   name: 'Techman',          stat: 'Built-in vision, no-code programming' },
+          { id: 'doosan',    name: 'Doosan',            stat: 'M-Series: up to 25kg collaborative' },
+          { id: 'fanuc-crx', name: 'FANUC CRX',        stat: 'Tablet-based drag-teach interface' },
+        ]
+      },
+      {
+        id: 'delta-scara', name: 'Delta / SCARA',
+        desc: 'Specialized high-speed forms. Delta for rapid pick-and-place, SCARA for flat-plane precision.',
+        stat: 'Dominant in food, pharma, and electronics packaging',
+        detail: 'Delta robots hang inverted from a frame and can cycle at several hundred picks per minute — far faster than articulated arms. SCARA robots are optimized for horizontal movement with rigid vertical compliance, ideal for inserting components into circuit boards.',
+        example: 'ABB FlexPicker delta robots sort 300+ items per minute in food packaging lines.',
+        companies: [
+          { id: 'abb',     name: 'ABB',     stat: '300+ items/min in food packaging lines' },
+          { id: 'omron',   name: 'Omron',   stat: 'Adept Quattro: fastest delta robot made' },
+          { id: 'epson',   name: 'Epson',   stat: 'T-series SCARA: 5kg payload, 800mm reach' },
+          { id: 'staubli', name: 'Stäubli', stat: 'TX2-series: pharma and medtech standard' },
+        ]
+      },
+      {
+        id: 'surgical', name: 'Surgical robots',
+        desc: 'Fixed-post precision systems for medical procedures. Mechanically, they\'re industrial arms with a different payload.',
+        stat: '$14B+ surgical robot market by 2028',
+        detail: 'Mechanically identical in principle to industrial arms — anchored base, multi-axis joints, end effector. The regulatory environment is different; the mechanics are not. The payload is a scalpel instead of a weld head.',
+        example: 'da Vinci is used in 1.5M+ surgeries per year globally. Its wristed instruments can rotate 360° inside a 1cm incision — beyond human hand capability.',
+        companies: [
+          { id: 'intuitive', name: 'Intuitive',    stat: '1.5M+ da Vinci surgeries per year' },
+          { id: 'stryker',   name: 'Stryker Mako', stat: '200,000+ Mako procedures in 2023' },
+          { id: 'medtronic', name: 'Medtronic',    stat: '4-arm Hugo system, global rollout' },
+          { id: 'cmr',       name: 'CMR Versius',  stat: 'Designed for smaller operating rooms' },
+        ]
+      },
+    ]
+  },
+  {
+    id: 'movers', num: '02', name: 'Movers',
+    tagline: 'Navigate space to transport',
+    market: '$5.2B AMR market (2026) · 15.3% CAGR',
+    color: '#2DD4A0',
+    subs: [
+      {
+        id: 'amrs', name: 'AMRs',
+        desc: 'Autonomous mobile robots that navigate dynamically using sensors and live maps.',
+        stat: '4.7M commercial units globally across 50,000+ facilities',
+        detail: 'AMRs build and update a map of their environment using LiDAR, cameras, and other sensors. Unlike AGVs, they can reroute around obstacles in real time. The e-commerce boom made this category — Amazon\'s fulfillment speed requires robots that handle a constantly changing floor.',
+        example: 'Amazon deploys ~750,000 AMRs across fulfillment centers. Proteus is the first fully autonomous AMR to work in unrestricted human spaces.',
+        companies: [
+          { id: 'amazon',  name: 'Amazon Robotics', stat: '~750,000 AMRs in fulfillment centers' },
+          { id: 'greyor',  name: 'GreyOrange',       stat: 'AI-orchestrated multi-robot fleets' },
+          { id: 'locus',   name: 'Locus Robotics',   stat: '100M+ units picked and delivered' },
+          { id: 'geekplus', name: 'Geek+',           stat: '50,000+ robots across 40+ countries' },
+        ]
+      },
+      {
+        id: 'delivery', name: 'Delivery robots',
+        desc: 'Sidewalk and campus last-mile transport. Pedestrian-speed movers for the final 500 feet.',
+        stat: 'Starship: 7M+ deliveries completed globally',
+        detail: 'These operate in a different regulatory and physical regime than road-level AVs. Walking speed on sidewalks, typically under 25 lbs payload, designed for food and small package delivery. The business model replaces gig delivery on short, dense routes.',
+        example: 'Serve Robotics operates in Los Angeles and Dallas, handling the last 500 feet — the most expensive part of the delivery equation.',
+        companies: [
+          { id: 'serve',    name: 'Serve Robotics', stat: 'Operating LA and Dallas food delivery' },
+          { id: 'starship', name: 'Starship',        stat: '7M+ deliveries on 50+ campuses' },
+          { id: 'kiwibot',  name: 'Kiwibot',         stat: 'Operations on 35+ US campuses' },
+          { id: 'nuro',     name: 'Nuro',             stat: 'R3: fully driverless grocery delivery' },
+        ]
+      },
+      {
+        id: 'autonomous-vehicles', name: 'Autonomous vehicles',
+        desc: 'Road-level transport. Moves people or cargo without a driver. Functionally: expensive Movers.',
+        stat: 'Waymo: 150,000+ paid rides per week in 2025',
+        detail: 'Waymo, Zoox, Nuro — all functionally Movers. The sophistication is in the navigation stack but the job is transport. This framing makes it clear why robotaxi and autonomous freight are converging.',
+        example: 'Nuro R3 delivers groceries and pharmacy orders autonomously in Houston. No human in or on the vehicle — purpose-built for cargo, not people.',
+        companies: [
+          { id: 'waymo',   name: 'Waymo',         stat: '150,000+ paid rides/week in 2025' },
+          { id: 'zoox',    name: 'Zoox',           stat: 'Purpose-built: no steering wheel' },
+          { id: 'motional', name: 'Motional',      stat: 'Ioniq 5 robotaxi, Lyft partnership' },
+          { id: 'tesla',   name: 'Tesla Cybercab', stat: 'Robotaxi targeted for 2026 launch' },
+        ]
+      },
+      {
+        id: 'drones', name: 'Drones / UAVs',
+        desc: 'Aerial movers. Logistics is the growth application. Inspection and surveillance are mature.',
+        stat: 'Zipline: 1M+ medical deliveries completed',
+        detail: 'The inspection and surveillance applications are mature. The frontier is logistics — particularly medical supply delivery in low-infrastructure regions, and consumer delivery in permitting-friendly markets. Regulatory environment is the primary constraint, not the technology.',
+        example: 'Wing operates commercial drone delivery in Canberra, Espoo, and Dallas-Fort Worth. Deliveries take ~10 minutes door-to-door.',
+        companies: [
+          { id: 'zipline', name: 'Zipline',         stat: '1M+ deliveries in Rwanda, Ghana, US' },
+          { id: 'wing',    name: 'Wing (Alphabet)', stat: 'AU, Finland, Dallas-Fort Worth ops' },
+          { id: 'skydio',  name: 'Skydio',          stat: 'Leading US drone for inspection' },
+          { id: 'dji',     name: 'DJI',              stat: '70%+ global consumer drone market' },
+        ]
+      },
+    ]
+  },
+  {
+    id: 'field', num: '03', name: 'Field robots',
+    tagline: 'Unstructured, unpredictable environments',
+    market: 'Humanoids: $3.1B (2026) · 35% CAGR',
+    color: '#FF7A4A',
+    subs: [
+      {
+        id: 'humanoids', name: 'Humanoids',
+        desc: 'Bipedal robots built for human-designed environments. The shape is the solution to the terrain problem.',
+        stat: '$46B humanoid market projected by 2035',
+        detail: 'The reason humanoids are bipedal is that the built world was designed for humans. Stairs, doorways, ladders, hand tools — all assume a human body. The humanoid form factor is the engineering answer to operating in spaces that can\'t be modified for wheeled robots.',
+        example: 'Agility Digit is deployed in Amazon pilot warehouse programs — the first commercial humanoid deployment at meaningful scale.',
+        companies: [
+          { id: 'figure',   name: 'Figure AI',        stat: 'Figure 02: dexterous manipulation' },
+          { id: 'optimus',  name: 'Tesla Optimus',    stat: 'Gen 2 walking in Tesla factories now' },
+          { id: 'atlas',    name: 'Boston Dynamics',  stat: 'Electric Atlas on production line pilot' },
+          { id: 'digit',    name: 'Agility Robotics', stat: 'First commercial humanoid at warehouse scale' },
+          { id: 'unitree',  name: 'Unitree H1',       stat: 'H1 at $90K: lowest-price bipedal robot' },
+        ]
+      },
+      {
+        id: 'quadrupeds', name: 'Quadrupeds',
+        desc: 'Four-legged robots built for rough terrain where wheels fail — stairs, rubble, uneven ground.',
+        stat: 'Spot deployed in 1,000+ industrial inspection programs',
+        detail: 'Four legs give better stability than two on uneven terrain. Quadrupeds are the field robot of choice for industrial inspection: oil platforms, nuclear plants, mine sites. They can be sent into spaces dangerous for humans and carry sensor payloads without shutting down operations.',
+        example: 'Boston Dynamics Spot inspects offshore oil platforms in the North Sea for BP, walking the platform daily and reading gauges in hazardous conditions.',
+        companies: [
+          { id: 'spot',     name: 'Boston Dynamics', stat: '1,000+ Spot programs: oil, nuclear, mining' },
+          { id: 'unitree-q', name: 'Unitree Go2',    stat: 'Go2 at $1,600: democratizing quadrupeds' },
+          { id: 'anymal',   name: 'ANYbotics',       stat: 'ANYmal designed for 24/7 inspection' },
+          { id: 'ghost',    name: 'Ghost Robotics',  stat: 'USAF perimeter patrol deployment' },
+        ]
+      },
+      {
+        id: 'large-machines', name: 'Large autonomous machines',
+        desc: 'Mining trucks, autonomous tractors, construction equipment. The most underreported field robot category by value.',
+        stat: 'Rio Tinto fleet: 100+ autonomous trucks, 10M+ km/yr',
+        detail: 'A single Caterpillar autonomous haul truck weighs 700 tons fully loaded and costs over $5M. There are thousands running in mines globally. This category dwarfs the humanoid hype cycle by market value — it\'s just less photogenic.',
+        example: 'Rio Tinto operates a fully autonomous mine in Western Australia\'s Pilbara region — autonomous trucks, trains, and drills with no humans in the operating loop.',
+        companies: [
+          { id: 'caterpillar', name: 'Caterpillar',     stat: '700-ton trucks at $5M+ — thousands running' },
+          { id: 'komatsu',     name: 'Komatsu',         stat: 'FrontRunner: 4,000+ autonomous trucks' },
+          { id: 'john-deere',  name: 'John Deere 8R',   stat: '24/7 autonomous field operation' },
+          { id: 'cnh',         name: 'CNH Industrial',  stat: 'Full-auto autonomous concept vehicle' },
+        ]
+      },
+      {
+        id: 'underwater', name: 'Underwater / AUVs',
+        desc: 'Autonomous and remotely operated robots for ocean, pipeline, and subsea inspection.',
+        stat: 'Subsea inspection robot market ~$3.8B by 2027',
+        detail: 'ROVs (Remotely Operated Vehicles) are tethered and human-controlled. AUVs (Autonomous Underwater Vehicles) operate independently. The oil and gas industry runs on subsea ROVs; ocean science increasingly uses AUVs for surveys prohibitively expensive with surface ships.',
+        example: 'Oceaneering ROVs inspect and repair deepwater oil infrastructure at 3,000m depth — pressures that would crush any human.',
+        companies: [
+          { id: 'oceaneering', name: 'Oceaneering',   stat: 'ROVs operating at 3,000m depth' },
+          { id: 'saab-seaeye', name: 'Saab Seaeye',   stat: 'Falcon: most deployed ROV globally' },
+          { id: 'kongsberg',   name: 'Kongsberg',     stat: 'HUGIN AUV for oceanographic surveys' },
+          { id: 'blue-robotics', name: 'Blue Robotics', stat: 'BlueROV2: 10,000+ units shipped' },
+        ]
+      },
+      {
+        id: 'space-hazardous', name: 'Space & hazardous',
+        desc: 'Where human entry is impossible. Bomb disposal, nuclear decommissioning, planetary exploration.',
+        stat: 'Perseverance rover: 25km+ driven on Mars since 2021',
+        detail: 'The original field robots — built before anyone called them that. These exist at the extreme edge of the category where human entry is prohibitive, dangerous, or impossible. The engineering constraints here drive the whole field forward.',
+        example: 'iRobot PackBot has been used in 3,000+ bomb disposal operations since 2001 in Iraq, Afghanistan, and domestic law enforcement.',
+        companies: [
+          { id: 'nasa',      name: 'NASA / JPL',        stat: 'Perseverance: 25km+ on Mars since 2021' },
+          { id: 'irobot',    name: 'iRobot Defense',    stat: '3,000+ bomb disposal operations' },
+          { id: 'sarcos',    name: 'Sarcos Guardian',   stat: 'Nuclear decommissioning missions' },
+          { id: 're2',       name: 'RE2 Robotics',      stat: 'DARPA-backed: underwater, air, ground' },
+        ]
+      },
+    ]
+  },
+  {
+    id: 'augmenters', num: '—', name: 'Augmenters',
+    tagline: 'Human stays the agent',
+    market: 'Exoskeleton market ~$6B by 2030',
+    color: '#6B7280',
+    isAugmenter: true,
+    subs: [
+      {
+        id: 'exoskeletons', name: 'Exoskeletons',
+        desc: 'Wearable frames that amplify human strength, endurance, or precision. Human remains in full control.',
+        stat: 'Ford: 83% reduction in ergonomic injuries',
+        detail: 'The defining question: does the system sense, decide, and act independently? Exoskeletons don\'t. The human decides and the machine amplifies. As they gain more autonomous stabilization, the line with Field Robots gets blurrier.',
+        example: 'Sarcos Guardian XO allows users to lift 90kg loads repeatedly without fatigue. Deployed by US Air Force for aircraft maintenance.',
+        companies: [
+          { id: 'sarcos-exo', name: 'Sarcos Guardian XO', stat: 'Lifts 90kg loads without fatigue' },
+          { id: 'ekso',       name: 'Ekso Bionics',       stat: 'Vest used in Ford assembly plants' },
+          { id: 'paexo',      name: 'Ottobock Paexo',     stat: 'Passive: no motor, spring-loaded' },
+          { id: 'hyundai-exo', name: 'Hyundai H-MEX',     stat: 'Walking rehab for spinal patients' },
+        ]
+      },
+      {
+        id: 'prosthetics', name: 'Powered prosthetics',
+        desc: 'Motorized limb replacements with sensor feedback. The line blurs as they become more autonomous.',
+        stat: '2M+ powered prosthetic users projected by 2028',
+        detail: 'A purely passive prosthetic is clearly a tool. A future prosthetic that anticipates needed movements and initiates them without explicit muscle signals starts to look like a robot attached to a person. This is the sharpest edge of the augmenter definition problem.',
+        example: 'Open Bionics Hero Arm reads electromyography signals from residual limb muscles to control individual finger movements.',
+        companies: [
+          { id: 'ossur',      name: 'Össur',             stat: 'POWER KNEE: full AI lower limb' },
+          { id: 'open-bio',   name: 'Open Bionics',      stat: 'Individual finger EMG control' },
+          { id: 'ottobock-p', name: 'Ottobock',          stat: 'Michelangelo Hand: multi-grip' },
+          { id: 'unlimited',  name: 'Unlimited Tomorrow', stat: '3D-scanned to fit each patient' },
+        ]
+      },
+    ]
+  },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let selectedCat = null;
+let selectedSub = null;
+let selectedCompany = null;
+
+// ── RENDER CATEGORIES ─────────────────────────────────────────────────────────
+function renderCategories() {
+  document.getElementById('cat-list').innerHTML = DATA.map(cat => `
+    <div class="cat-item${cat.isAugmenter ? ' augmenter' : ''}"
+         id="cat-${cat.id}"
+         style="--cat-color:${cat.color}"
+         onclick="selectCategory('${cat.id}')">
+      ${cat.isAugmenter ? '<span class="aug-badge">Not strictly robots</span>' : ''}
+      <div class="cat-num">${cat.num}</div>
+      <div class="cat-name">${cat.name}<span class="cat-arrow">→</span></div>
+      <div class="cat-tagline">${cat.tagline}</div>
+      <div class="cat-market" style="color:${cat.color};opacity:0.65;">${cat.market}</div>
+    </div>
+  `).join('');
+}
+
+// ── SELECT CATEGORY ───────────────────────────────────────────────────────────
+function selectCategory(catId) {
+  const cat = DATA.find(c => c.id === catId);
+  if (!cat) return;
+
+  document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('selected'));
+  document.getElementById('cat-' + catId).classList.add('selected');
+
+  selectedCat = catId;
+  selectedSub = null;
+  selectedCompany = null;
+
+  const col2 = document.getElementById('col2');
+  const col2Title = document.getElementById('col2-title');
+  col2Title.textContent = cat.name;
+  col2Title.style.color = cat.color;
+
+  document.getElementById('sub-list').innerHTML = cat.subs.map(sub => `
+    <div class="sub-item" id="sub-${sub.id}" style="--cat-color:${cat.color}" onclick="selectSub('${catId}','${sub.id}')">
+      <div class="sub-name">${sub.name}<span class="sub-arrow">→</span></div>
+      <div class="sub-desc">${sub.desc}</div>
+    </div>
+  `).join('');
+
+  col2.classList.add('visible');
+  document.getElementById('col3').classList.remove('visible');
+  document.getElementById('detail-content').innerHTML = '';
+
+  updateBreadcrumb(cat.name, null, cat.color);
+}
+
+// ── SELECT SUB-TYPE ───────────────────────────────────────────────────────────
+function selectSub(catId, subId) {
+  const cat = DATA.find(c => c.id === catId);
+  const sub = cat?.subs.find(s => s.id === subId);
+  if (!cat || !sub) return;
+
+  document.querySelectorAll('.sub-item').forEach(el => el.classList.remove('selected'));
+  document.getElementById('sub-' + subId).classList.add('selected');
+
+  selectedSub = subId;
+
+  // Default to first company
+  const firstCompany = sub.companies[0];
+  selectedCompany = firstCompany.id;
+
+  renderDetail(cat, sub, firstCompany);
+
+  const col3 = document.getElementById('col3');
+  col3.style.setProperty('--cat-color', cat.color);
+  col3.classList.add('visible');
+
+  updateBreadcrumb(cat.name, sub.name, cat.color);
+}
+
+// ── RENDER DETAIL PANEL ───────────────────────────────────────────────────────
+function renderDetail(cat, sub, activeCompany) {
+  const imgPath = `./images/${sub.id}/${activeCompany.id}.jpg`;
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-content">
+
+      <div class="detail-img-wrap">
+        <img id="detail-img"
+             src="${imgPath}"
+             alt="${activeCompany.name} ${sub.name}"
+             onload="this.classList.remove('loading')"
+             onerror="this.style.display='none'; document.getElementById('img-placeholder').style.display='flex';"
+             class="loading">
+        <div id="img-placeholder" class="img-placeholder" style="display:none">
+          <div class="img-placeholder-icon">[ ]</div>
+          <div class="img-placeholder-text">Image: ./images/${sub.id}/${activeCompany.id}.jpg</div>
+        </div>
+        <div class="img-gradient"></div>
+        <div class="img-company-label" id="img-company-label">${activeCompany.name}</div>
+      </div>
+
+      <div class="detail-header">
+        <div class="detail-category-label" style="color:${cat.color}">${cat.name} / ${cat.num}</div>
+        <div class="detail-name">${sub.name}</div>
+        <div class="detail-desc">${sub.desc}</div>
+      </div>
+
+      <div class="detail-body">
+        <div class="detail-stat" style="border-left-color:${cat.color}">
+          <div class="detail-stat-label">Key stat</div>
+          <div class="detail-stat-value" style="color:${cat.color}" id="company-stat">${activeCompany.stat}</div>
+        </div>
+
+        <div>
+          <div class="detail-section-label">What to know</div>
+          <div class="detail-text">${sub.detail}</div>
+        </div>
+
+        <div>
+          <div class="detail-section-label">Key players — select to view</div>
+          <div class="detail-companies" id="company-pills">
+            ${sub.companies.map(co => `
+              <div class="company-pill${co.id === activeCompany.id ? ' active' : ''}"
+                   onclick="switchCompany('${cat.id}','${sub.id}','${co.id}')"
+                   data-company="${co.id}">
+                ${co.name}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="detail-example">
+          <div class="detail-example-label">Real-world example</div>
+          <div class="detail-example-text">${sub.example}</div>
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+
+// ── SWITCH COMPANY IMAGE ──────────────────────────────────────────────────────
+function switchCompany(catId, subId, companyId) {
+  const cat = DATA.find(c => c.id === catId);
+  const sub = cat?.subs.find(s => s.id === subId);
+  const co  = sub?.companies.find(c => c.id === companyId);
+  if (!co) return;
+
+  selectedCompany = companyId;
+
+  // Update pill active state
+  document.querySelectorAll('.company-pill').forEach(el => {
+    el.classList.toggle('active', el.dataset.company === companyId);
+  });
+
+  // Update image
+  const imgPath = `./images/${subId}/${companyId}.jpg`;
+  const img = document.getElementById('detail-img');
+  const placeholder = document.getElementById('img-placeholder');
+
+  if (img) {
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+    img.classList.add('loading');
+
+    const newImg = new Image();
+    newImg.onload = () => {
+      img.src = imgPath;
+      img.alt = `${co.name} ${sub.name}`;
+      img.classList.remove('loading');
+    };
+    newImg.onerror = () => {
+      img.style.display = 'none';
+      placeholder.style.display = 'flex';
+      placeholder.querySelector('.img-placeholder-text').textContent = `Image: ./images/${subId}/${companyId}.jpg`;
+    };
+    newImg.src = imgPath;
+  }
+
+  // Update company label + stat
+  const labelEl = document.getElementById('img-company-label');
+  const statEl  = document.getElementById('company-stat');
+  if (labelEl) labelEl.textContent = co.name;
+  if (statEl)  statEl.textContent  = co.stat;
+}
+
+// ── BREADCRUMB ────────────────────────────────────────────────────────────────
+function updateBreadcrumb(catName, subName, color) {
+  const bc = document.getElementById('breadcrumb');
+  if (!subName) {
+    bc.innerHTML = `<span class="crumb active" style="color:${color}">${catName}</span>`;
+  } else {
+    bc.innerHTML = `
+      <span class="crumb" style="color:${color}">${catName}</span>
+      <span class="sep">›</span>
+      <span class="crumb active">${subName}</span>
+    `;
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderCategories();
+</script>
+</body>
+</html>
