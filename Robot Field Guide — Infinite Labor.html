@@ -21,6 +21,7 @@
   .header-brand span { color: var(--text-primary); }
   .breadcrumb { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 8px; }
   .crumb { color: var(--text-secondary); } .crumb.active { color: var(--text-primary); } .sep { color: var(--text-dim); font-size: 9px; }
+  .header-hint { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 0.05em; }
   .explorer { position: fixed; top: 52px; bottom: 0; left: 0; right: 0; display: flex; overflow: hidden; }
   .column { height: 100%; overflow-y: auto; overflow-x: hidden; flex-shrink: 0; border-right: 1px solid var(--border); transition: width var(--transition), opacity var(--transition), transform var(--transition); scrollbar-width: thin; scrollbar-color: var(--border-bright) transparent; }
   .column::-webkit-scrollbar { width: 3px; } .column::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
@@ -92,6 +93,7 @@
 <header class="header">
   <div class="header-brand"><span>INFINITE LABOR</span> / Robot Field Guide</div>
   <div class="breadcrumb" id="breadcrumb"><span class="crumb active">Categories</span></div>
+  <div class="header-hint">Select to explore →</div>
 </header>
 <main class="explorer">
   <div class="column col1" id="col1">
@@ -116,9 +118,9 @@ const DATA = [
         companies:[
           { id:'fanuc',    name:'FANUC',    stat:'750,000+ robots installed globally',   img: WM+'FANUC_R-2000iB_series_robot_128.jpg',                            search:'FANUC R-2000 robot arm industrial' },
           { id:'kuka',     name:'KUKA',     stat:'Powers BMW, Mercedes and Airbus lines', img: WM+'KUKA_Industrial_Robots_IR.jpg',                                  search:'KUKA industrial robot arm orange' },
-          { id:'abb',      name:'ABB',      stat:'500,000+ robots across 53 countries',   img: null,                   search:'ABB IRB industrial robot arm factory' },
+          { id:'abb',      name:'ABB',      stat:'500,000+ robots across 53 countries',   img: WM+'Robotics_of_ABB_at_the_Harnosands_museum.jpg',                   search:'ABB IRB industrial robot arm factory' },
           { id:'yaskawa',  name:'Yaskawa',  stat:'500,000+ Motoman robots shipped',       img: WM+'Motoman_Industrie-Schweissroboter.jpg',                          search:'Yaskawa Motoman robot arm welding' },
-          { id:'kawasaki', name:'Kawasaki', stat:'Pioneer in dual-arm assembly robots',   img: null,                                          search:'Kawasaki RS robot arm industrial' },
+          { id:'kawasaki', name:'Kawasaki', stat:'Pioneer in dual-arm assembly robots',   img: WM+'Kawasaki_RS_robot.jpg',                                          search:'Kawasaki RS robot arm industrial' },
         ]
       },
       { id:'cobots', name:'Cobots', desc:'Force-limited arms built to work next to humans safely. No cage required.',
@@ -126,7 +128,7 @@ const DATA = [
         companies:[
           { id:'universal', name:'Universal Robots', stat:'75,000+ UR cobots in operation',       img: WM+'UR16e_robot_arm.png',                                    search:'Universal Robots UR5 UR10 cobot arm' },
           { id:'techman',   name:'Techman',           stat:'Built-in vision, no-code programming', img: null,                                                        search:'Techman TM cobot robot arm vision' },
-          { id:'doosan',    name:'Doosan',             stat:'M-Series: up to 25kg collaborative',   img: null,                                search:'Doosan Robotics M-series cobot' },
+          { id:'doosan',    name:'Doosan',             stat:'M-Series: up to 25kg collaborative',   img: WM+'Doosan_M1013_cobot.jpg',                                search:'Doosan Robotics M-series cobot' },
           { id:'fanuc-crx', name:'FANUC CRX',          stat:'Tablet-based drag-teach interface',    img: null,                                                        search:'FANUC CRX-10 collaborative robot green' },
         ]
       },
@@ -134,8 +136,8 @@ const DATA = [
         stat:'Dominant in food, pharma, and electronics packaging', detail:'Delta robots hang inverted from a frame and can cycle at several hundred picks per minute. SCARA robots are optimized for horizontal movement with rigid vertical compliance, ideal for circuit board assembly.', example:'ABB FlexPicker delta robots sort 300+ items per minute in food packaging lines.',
         companies:[
           { id:'abb-d',   name:'ABB FlexPicker', stat:'300+ items/min in food packaging lines',   img: WM+'IRB_360_FlexPicker.jpg',                                 search:'ABB IRB 360 FlexPicker delta robot' },
-          { id:'omron',   name:'Omron',           stat:'Adept Quattro: fastest delta robot made',  img: null,               search:'Omron Adept Quattro delta robot' },
-          { id:'epson',   name:'Epson',           stat:'T-series SCARA: 5kg payload, 800mm reach', img: null,                                  search:'Epson SCARA robot T-series arm' },
+          { id:'omron',   name:'Omron',           stat:'Adept Quattro: fastest delta robot made',  img: WM+'Omron_Adept_Quattro_650H_delta_robot.jpg',               search:'Omron Adept Quattro delta robot' },
+          { id:'epson',   name:'Epson',           stat:'T-series SCARA: 5kg payload, 800mm reach', img: WM+'Epson_SCARA_robot.jpg',                                  search:'Epson SCARA robot T-series arm' },
           { id:'staubli', name:'Stäubli',         stat:'TX2-series: pharma and medtech standard',  img: null,                                                        search:'Stäubli TS2 SCARA robot pharma cleanroom' },
         ]
       },
@@ -143,7 +145,7 @@ const DATA = [
         stat:'$14B+ surgical robot market by 2028', detail:'Same mechanical logic as an industrial arm — anchored base, multi-axis joints, precision end effector. The regulatory environment is different; the mechanics are not. The payload is a scalpel instead of a weld head.', example:'da Vinci is used in 1.5M+ surgeries per year globally. Its wristed instruments rotate 360° inside a 1cm incision.',
         companies:[
           { id:'intuitive', name:'Intuitive',    stat:'1.5M+ da Vinci surgeries per year',    img: WM+'Davinci_robot.jpg',                                          search:'da Vinci surgical robot Intuitive operating room' },
-          { id:'stryker',   name:'Stryker Mako', stat:'200,000+ Mako procedures in 2023',     img: null,                                    search:'Stryker Mako robotic arm surgery orthopedic' },
+          { id:'stryker',   name:'Stryker Mako', stat:'200,000+ Mako procedures in 2023',     img: WM+'MAKO_Surgical_Robot.jpg',                                    search:'Stryker Mako robotic arm surgery orthopedic' },
           { id:'medtronic', name:'Medtronic',     stat:'4-arm Hugo system, global rollout',    img: null,                                                            search:'Medtronic Hugo RAS surgical robot arms' },
           { id:'cmr',       name:'CMR Versius',   stat:'Designed for smaller operating rooms', img: null,                                                            search:'CMR Versius surgical robot arms hospital' },
         ]
@@ -155,10 +157,10 @@ const DATA = [
       { id:'amrs', name:'AMRs', desc:'Autonomous mobile robots that navigate dynamically using sensors and live maps.',
         stat:'4.7M commercial units globally across 50,000+ facilities', detail:'AMRs build and update a map using LiDAR, cameras, and sensors. Unlike AGVs, they reroute around obstacles in real time. The e-commerce boom created this category.', example:'Amazon deploys ~750,000 AMRs across fulfillment centers. Proteus is the first fully autonomous AMR cleared to work in unrestricted human spaces.',
         companies:[
-          { id:'amazon',   name:'Amazon Robotics', stat:'~750,000 AMRs in fulfillment centers', img: WM+'Amazon_warehouse_robot_2020.JPG',                               search:'Amazon Kiva orange warehouse robot fulfillment' },
+          { id:'amazon',   name:'Amazon Robotics', stat:'~750,000 AMRs in fulfillment centers', img: WM+'Amazon_warehouse_robot.jpg',                               search:'Amazon Kiva orange warehouse robot fulfillment' },
           { id:'greyor',   name:'GreyOrange',       stat:'AI-orchestrated multi-robot fleets',   img: null,                                                          search:'GreyOrange Ranger AMR warehouse robot orange' },
           { id:'locus',    name:'Locus Robotics',   stat:'100M+ units picked and delivered',     img: null,                                                          search:'Locus Robotics LocusBot warehouse AMR blue' },
-          { id:'geekplus', name:'Geek+',             stat:'50,000+ robots across 40+ countries', img: 'https://mma.prnewswire.com/media/2533445/Geekplus_Shelf_To_Person_Robot_1.jpg',                                                          search:'Geek Plus picking robot warehouse sorting' },
+          { id:'geekplus', name:'Geek+',             stat:'50,000+ robots across 40+ countries', img: null,                                                          search:'Geek Plus picking robot warehouse sorting' },
         ]
       },
       { id:'delivery', name:'Delivery robots', desc:'Sidewalk and campus last-mile transport. Pedestrian-speed movers for the final 500 feet.',
@@ -166,8 +168,8 @@ const DATA = [
         companies:[
           { id:'serve',    name:'Serve Robotics', stat:'Operating LA and Dallas food delivery',  img: null,                                                          search:'Serve Robotics sidewalk delivery robot LA white' },
           { id:'starship', name:'Starship',        stat:'7M+ deliveries on 50+ campuses',         img: WM+'Starship_robot_at_Kellogg_College_cropped.jpg',           search:'Starship Technologies robot campus delivery' },
-          { id:'kiwibot',  name:'Kiwibot',          stat:'Operations on 35+ US campuses',         img: null,                              search:'Kiwibot delivery robot campus sidewalk blue' },
-          { id:'nuro',     name:'Nuro',              stat:'R3: fully driverless grocery delivery', img: null,                          search:'Nuro R2 autonomous delivery vehicle yellow' },
+          { id:'kiwibot',  name:'Kiwibot',          stat:'Operations on 35+ US campuses',         img: WM+'Kiwibot_sidewalk_robot.jpg',                              search:'Kiwibot delivery robot campus sidewalk blue' },
+          { id:'nuro',     name:'Nuro',              stat:'R3: fully driverless grocery delivery', img: WM+'Nuro_R2_autonomous_vehicle.jpg',                          search:'Nuro R2 autonomous delivery vehicle yellow' },
         ]
       },
       { id:'autonomous-vehicles', name:'Autonomous vehicles', desc:'Road-level transport. Moves people or cargo without a driver. Functionally: expensive Movers.',
@@ -176,7 +178,7 @@ const DATA = [
           { id:'waymo',    name:'Waymo',          stat:'150,000+ paid rides/week in 2025',  img: WM+'Waymo_Chrysler_Pacifica_in_Los_Altos,_2017.jpg',               search:'Waymo self-driving car white sensor array' },
           { id:'zoox',     name:'Zoox',            stat:'Purpose-built: no steering wheel',  img: WM+'Zoox_Toyota_Highlander_Test_Vehicle_-_San_Francisco,_May_2025_08.jpg', search:'Zoox autonomous vehicle purple bidirectional Amazon' },
           { id:'motional', name:'Motional',        stat:'Ioniq 5 robotaxi, Lyft partnership', img: null,                                                             search:'Motional Ioniq 5 robotaxi autonomous Lyft' },
-          { id:'tesla',    name:'Tesla Cybercab',  stat:'Robotaxi targeted for 2026 launch', img: null,                    search:'Tesla Cybercab robotaxi reveal 2024' },
+          { id:'tesla',    name:'Tesla Cybercab',  stat:'Robotaxi targeted for 2026 launch', img: WM+'Tesla_Cybercab_at_the_We_Robot_Event.jpg',                    search:'Tesla Cybercab robotaxi reveal 2024' },
         ]
       },
       { id:'drones', name:'Drones / UAVs', desc:'Aerial movers. Logistics is the growth application. Inspection and surveillance are mature.',
@@ -196,9 +198,9 @@ const DATA = [
         stat:'$46B humanoid market projected by 2035', detail:'The reason humanoids are bipedal is that the built world was designed for humans. Stairs, doorways, ladders, hand tools — all assume a human body. The humanoid form factor is the engineering answer to operating in spaces that cannot be modified for wheeled robots.', example:'Agility Digit is deployed in Amazon pilot warehouse programs — the first commercial humanoid deployment at meaningful scale.',
         companies:[
           { id:'figure',  name:'Figure AI',       stat:'Figure 02: dexterous manipulation focus',      img: null,                                                   search:'Figure AI 02 humanoid robot white BMW factory' },
-          { id:'optimus', name:'Tesla Optimus',    stat:'Gen 2 walking in Tesla factories now',         img: WM+'Tesla_Bot,_Tesla_Shop,_Westfield_Century_City_(Sept._2024).JPG',                           search:'Tesla Optimus Gen 2 humanoid robot silver' },
+          { id:'optimus', name:'Tesla Optimus',    stat:'Gen 2 walking in Tesla factories now',         img: WM+'Tesla_Optimus_Gen_2.jpg',                           search:'Tesla Optimus Gen 2 humanoid robot silver' },
           { id:'atlas',   name:'Boston Dynamics',  stat:'Electric Atlas on production line pilot',      img: WM+'Atlas_during_testing.jpg',                          search:'Boston Dynamics Atlas humanoid robot white electric' },
-          { id:'digit',   name:'Agility Robotics', stat:'First commercial humanoid at warehouse scale', img: null,                        search:'Agility Robotics Digit bipedal humanoid robot blue warehouse' },
+          { id:'digit',   name:'Agility Robotics', stat:'First commercial humanoid at warehouse scale', img: WM+'Digit_Agility_Robotics.jpg',                        search:'Agility Robotics Digit bipedal humanoid robot blue warehouse' },
           { id:'unitree', name:'Unitree H1',        stat:'H1 at $90K: lowest-price bipedal robot',      img: null,                                                   search:'Unitree H1 humanoid robot backflip black' },
         ]
       },
@@ -207,26 +209,26 @@ const DATA = [
         companies:[
           { id:'spot',      name:'Boston Dynamics', stat:'1,000+ Spot programs: oil, nuclear, mining', img: WM+'SpotMini,_Boston_Dynamics,_Robot.jpg',              search:'Boston Dynamics Spot yellow quadruped robot' },
           { id:'unitree-q', name:'Unitree Go2',      stat:'Go2 at $1,600: democratizing quadrupeds',    img: 'https://mma.prnewswire.com/media/2156336/Unitree_Go2_ENCover_1.jpg', search:'Unitree Go2 quadruped robot dog' },
-          { id:'anymal',    name:'ANYbotics',         stat:'ANYmal designed for 24/7 inspection',        img: null,                        search:'ANYbotics ANYmal quadruped robot inspection outdoor' },
-          { id:'ghost',     name:'Ghost Robotics',    stat:'USAF perimeter patrol deployment',           img: WM+'Ghost_Robotics_Vision_60_Q-UGV_Demo_(7351259).jpeg',                      search:'Ghost Robotics Vision 60 military quadruped USAF' },
+          { id:'anymal',    name:'ANYbotics',         stat:'ANYmal designed for 24/7 inspection',        img: WM+'ANYmal_walking_outdoor.jpg',                        search:'ANYbotics ANYmal quadruped robot inspection outdoor' },
+          { id:'ghost',     name:'Ghost Robotics',    stat:'USAF perimeter patrol deployment',           img: WM+'Vision_60_Ghost_Robotics.jpg',                      search:'Ghost Robotics Vision 60 military quadruped USAF' },
         ]
       },
       { id:'large-machines', name:'Large autonomous machines', desc:'Mining trucks, autonomous tractors, construction equipment. Most underreported field robot category by value.',
         stat:'Rio Tinto fleet: 100+ autonomous trucks, 10M+ km/yr', detail:'A single Caterpillar autonomous haul truck weighs 700 tons loaded and costs over $5M. There are thousands running in mines globally. This category dwarfs the humanoid hype cycle by market value.', example:'Rio Tinto operates a fully autonomous mine in Western Australia — autonomous trucks, trains, and drills with no humans in the operating loop.',
         companies:[
-          { id:'caterpillar', name:'Caterpillar',   stat:'700-ton trucks at $5M+ — thousands running', img: WM+'Caterpillar_797_Mining_Truck_(14745198060).jpg',                   search:'Caterpillar 797 autonomous haul truck mining site' },
-          { id:'komatsu',     name:'Komatsu',        stat:'FrontRunner: 4,000+ autonomous trucks',      img: WM+'KOMATSU_930E-2.JPG',                     search:'Komatsu 930E autonomous dump truck mining' },
-          { id:'john-deere',  name:'John Deere 8R',  stat:'24/7 autonomous field operation',            img: null,          search:'John Deere 8R autonomous tractor CES 2022' },
+          { id:'caterpillar', name:'Caterpillar',   stat:'700-ton trucks at $5M+ — thousands running', img: WM+'Caterpillar_797B_haul_truck.jpg',                   search:'Caterpillar 797 autonomous haul truck mining site' },
+          { id:'komatsu',     name:'Komatsu',        stat:'FrontRunner: 4,000+ autonomous trucks',      img: WM+'Komatsu_930E-4_haul_truck.jpg',                     search:'Komatsu 930E autonomous dump truck mining' },
+          { id:'john-deere',  name:'John Deere 8R',  stat:'24/7 autonomous field operation',            img: WM+'John_Deere_8R_410_autonomous_tractor.jpg',          search:'John Deere 8R autonomous tractor CES 2022' },
           { id:'cnh',         name:'CNH Industrial', stat:'Full-auto autonomous concept vehicle',       img: null,                                                    search:'Case IH autonomous concept vehicle tractor driverless' },
         ]
       },
       { id:'underwater', name:'Underwater / AUVs', desc:'Autonomous and remotely operated robots for ocean, pipeline, and subsea inspection.',
         stat:'Subsea inspection robot market ~$3.8B by 2027', detail:'ROVs are tethered and human-controlled. AUVs operate independently on pre-programmed missions. The oil and gas industry runs on subsea ROVs; ocean science uses AUVs for surveys prohibitively expensive with surface ships.', example:'Oceaneering ROVs inspect and repair deepwater oil infrastructure at 3,000m depth — pressures that would crush any human.',
         companies:[
-          { id:'oceaneering',   name:'Oceaneering',   stat:'ROVs operating at 3,000m depth',       img: null,                                    search:'Oceaneering ROV remotely operated vehicle subsea yellow' },
+          { id:'oceaneering',   name:'Oceaneering',   stat:'ROVs operating at 3,000m depth',       img: WM+'Oceaneering_ROV.jpg',                                    search:'Oceaneering ROV remotely operated vehicle subsea yellow' },
           { id:'saab-seaeye',   name:'Saab Seaeye',   stat:'Falcon: most deployed ROV globally',    img: null,                                                        search:'Saab Seaeye Falcon ROV underwater robot orange' },
           { id:'kongsberg',     name:'Kongsberg',      stat:'HUGIN AUV for oceanographic surveys',   img: WM+'HUGIN_AUV.jpg',                                         search:'Kongsberg HUGIN AUV autonomous underwater vehicle' },
-          { id:'blue-robotics', name:'Blue Robotics',  stat:'BlueROV2: 10,000+ units shipped',       img: null,                         search:'BlueROV2 underwater drone robot blue' },
+          { id:'blue-robotics', name:'Blue Robotics',  stat:'BlueROV2: 10,000+ units shipped',       img: WM+'BlueROV2_underwater_robot.jpg',                         search:'BlueROV2 underwater drone robot blue' },
         ]
       },
       { id:'space-hazardous', name:'Space & hazardous', desc:'Where human entry is impossible. Bomb disposal, nuclear decommissioning, planetary exploration.',
@@ -234,7 +236,7 @@ const DATA = [
         companies:[
           { id:'nasa',   name:'NASA / JPL',      stat:'Perseverance: 25km+ on Mars since 2021', img: WM+'PIA23764-RoverPerseveranceAtJezeroOnMars-20210218.jpg',     search:'NASA Perseverance rover Mars surface JPL' },
           { id:'irobot', name:'iRobot PackBot',  stat:'3,000+ bomb disposal operations',        img: WM+'IRobot_PackBot.jpg',                                         search:'iRobot PackBot EOD bomb disposal robot military' },
-          { id:'sarcos', name:'Sarcos Guardian', stat:'Nuclear decommissioning missions',        img: null,                               search:'Sarcos Guardian GT teleoperated robot hazmat nuclear' },
+          { id:'sarcos', name:'Sarcos Guardian', stat:'Nuclear decommissioning missions',        img: WM+'Sarcos_Guardian_GT_robot.jpg',                               search:'Sarcos Guardian GT teleoperated robot hazmat nuclear' },
           { id:'re2',    name:'RE2 Robotics',     stat:'DARPA-backed: underwater, air, ground',  img: null,                                                            search:'RE2 Robotics manipulator arm DARPA military robot' },
         ]
       },
@@ -245,18 +247,18 @@ const DATA = [
       { id:'exoskeletons', name:'Exoskeletons', desc:'Wearable frames that amplify human strength, endurance, or precision. Human remains in full control.',
         stat:'Ford: 83% reduction in ergonomic injuries', detail:'The defining question: does the system sense, decide, and act independently? Exoskeletons do not. The human decides and the machine amplifies. As they gain more autonomous stabilization, the line with Field Robots gets blurrier.', example:'Sarcos Guardian XO allows users to lift 90kg loads repeatedly without fatigue. Deployed by US Air Force for aircraft maintenance.',
         companies:[
-          { id:'sarcos-exo', name:'Sarcos Guardian XO', stat:'Lifts 90kg loads without fatigue',       img: null,                 search:'Sarcos Guardian XO full body exoskeleton worker' },
-          { id:'ekso',        name:'Ekso Bionics',        stat:'EksoVest used in Ford assembly plants',  img: null,                search:'Ekso Bionics EksoVest industrial exoskeleton Ford' },
+          { id:'sarcos-exo', name:'Sarcos Guardian XO', stat:'Lifts 90kg loads without fatigue',       img: WM+'Sarcos_Guardian_XO_exoskeleton.jpg',                 search:'Sarcos Guardian XO full body exoskeleton worker' },
+          { id:'ekso',        name:'Ekso Bionics',        stat:'EksoVest used in Ford assembly plants',  img: WM+'EksoVest_industrial_exoskeleton.jpg',                search:'Ekso Bionics EksoVest industrial exoskeleton Ford' },
           { id:'paexo',       name:'Ottobock Paexo',      stat:'Passive: no motor, spring-loaded',       img: null,                                                    search:'Ottobock Paexo exoskeleton back worker passive' },
-          { id:'hyundai-exo', name:'Hyundai H-MEX',       stat:'Walking rehab for spinal patients',      img: null,                     search:'Hyundai H-MEX medical exoskeleton walking rehab' },
+          { id:'hyundai-exo', name:'Hyundai H-MEX',       stat:'Walking rehab for spinal patients',      img: WM+'Hyundai_H-MEX_exoskeleton.jpg',                     search:'Hyundai H-MEX medical exoskeleton walking rehab' },
         ]
       },
       { id:'prosthetics', name:'Powered prosthetics', desc:'Motorized limb replacements with sensor feedback. The line blurs as they become more autonomous.',
         stat:'2M+ powered prosthetic users projected by 2028', detail:'A purely passive prosthetic is clearly a tool. A future prosthetic that anticipates needed movements and initiates them without explicit muscle signals starts to look like a robot attached to a person.', example:'Open Bionics Hero Arm reads electromyography signals from residual limb muscles to control individual finger movements.',
         companies:[
-          { id:'ossur',      name:'Össur',             stat:'POWER KNEE: full AI lower limb',    img: null,                           search:'Össur Power Knee prosthetic leg running' },
+          { id:'ossur',      name:'Össur',             stat:'POWER KNEE: full AI lower limb',    img: WM+'Ossur_Power_Knee_prosthetic.jpg',                           search:'Össur Power Knee prosthetic leg running' },
           { id:'open-bio',   name:'Open Bionics',      stat:'Individual finger EMG control',     img: WM+'Open_Bionics_Hero_Arm.jpg',                                 search:'Open Bionics Hero Arm prosthetic colorful' },
-          { id:'ottobock-p', name:'Ottobock',           stat:'Michelangelo Hand: multi-grip',     img: null,                            search:'Ottobock Michelangelo prosthetic hand' },
+          { id:'ottobock-p', name:'Ottobock',           stat:'Michelangelo Hand: multi-grip',     img: WM+'Ottobock_Michelangelo_hand.jpg',                            search:'Ottobock Michelangelo prosthetic hand' },
           { id:'unlimited',  name:'Unlimited Tomorrow',stat:'3D-scanned to fit each patient',    img: null,                                                           search:'Unlimited Tomorrow TrueLimb prosthetic arm 3D printed' },
         ]
       },
