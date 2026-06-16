@@ -1001,7 +1001,9 @@ function applyPoints(companies){
     .pointLat('lat').pointLng('lng')
     .pointColor(d=>TYPE_COLORS[d.type]||'#888')
     .pointAltitude(0.02)
-    .pointRadius(d=>d.il_covered?0.5:0.3);
+    .pointRadius(d=>d.il_covered?0.5:0.3)
+    .pointLabel(d=>`<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:rgba(10,9,8,0.96);color:#f0ece2;padding:6px 10px;border:0.5px solid #2a2620;border-left:2px solid ${TYPE_COLORS[d.type]};pointer-events:none">${d.name}<br><span style="color:#5a5448;font-size:9px">${d.type} · ${d.hq}</span></div>`)
+    .onPointClick(d=>openPanel(d));
   document.getElementById('stat-companies').textContent = companies.length;
   updateCapital(companies);
   renderCompanyList(companies);
